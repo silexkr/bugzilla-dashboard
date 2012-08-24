@@ -113,7 +113,6 @@ my $result = $res->result;
 
 my @bugs = Bugzilla::Dashboard::Bug->new( @{ $result->{bugs} } );
 for my $bug (@bugs) {
-    say ref($bug);
     say "ID: ", $bug->id;
     say "    SUMMARY: ", $bug->summary;
     say "    CREATOR: ", $bug->creator;
@@ -121,75 +120,3 @@ for my $bug (@bugs) {
     say "     UPDATE: ", $bug->last_change_time;
     say "     CREATE: ", $bug->creation_time;
 }
-
-
-__DATA__
-
-
-# case 1
-use Bugzilla::Dashboard::Bug;
-
-my @bugs;
-for my $bug ( @{ $result->{bugs} } ) {
-    my $bug_obj = Bugzilla::Dashboard::Bug->new( $bug );
-    push @bugs, $bug_obj;
-}
-
-# case 2
-use Bugzilla::Dashboard::Bug;
-
-my @bugs = Bugzilla::Dashboard::Bug->new( @{ $result->{bugs} } );
-
-
-Bugzilla::Dashboard
-
-my $bug = Bugzilla::Dashboard::Bug->new( $hash_ref );
-
-# read-only method
-$bug->priority
-$bug->creator
-$bug->blocks
-$bug->last_change_time
-$bug->assigned_to
-$bug->creation_time
-$bug->id
-$bug->depends_on
-$bug->resolution
-$bug->classification
-$bug->alias
-$bug->status
-$bug->summary
-$bug->deadline
-$bug->component
-$bug->product
-$bug->is_open
-
-
-
-
-
-
-
-#for my $bugs_array ( @{ $result->{bugs} } ) {
-#    for my $bugs_attr ( keys %{ $bugs_array } ) {
-#            if (defined $bugs_array->{$bugs_attr} ){
-#                printf("%20s: %s\n", $bugs_attr, $bugs_array->{$bugs_attr});
-#        }
-#    }
-#}
-
-__DATA__
-
-$res->result              # scalar = hash ref
-$res->result->{bugs}      # scalar = array ref
-$res->result->{bugs}->[0] # scalar = hash ref
-$res->result->{bugs}[0]   # scalar = hash ref
-
-my $result = $res->result;
-$result                   # scalar = hash ref
-$result->{bugs}           # scalar = array ref
-$result->{bugs}->[0]      # scalar = hash ref
-$result->{bugs}[0]        # scalar = hash ref
-
-say for keys %{ $result->{bugs}[0] }; # standard way
-say for keys $result->{bugs}[0];      # 5.14 only

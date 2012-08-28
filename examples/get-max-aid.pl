@@ -7,12 +7,14 @@ use warnings;
 
 use Data::Dumper;
 use Getopt::Long::Descriptive;
+use List::Util qw( max );
+
 use Bugzilla::Dashboard;
 
 binmode STDOUT, ':utf8';
 
 my ( $opt, $usage ) = describe_options(
-    "$0 <category> <method> [ <params1> ... ]",
+    "$0 <category> <method> [ <attachment count> ... ]",
     [
         'user|u=s',  "username",
         { default => 'jeho.sung@silex.kr' }
@@ -32,13 +34,13 @@ my ( $opt, $usage ) = describe_options(
     [ 'help|h',    "print this" ],
 );
 
+my $attachment_count = shift;
+
 my $dashboard = Bugzilla::Dashboard->new(
     uri      => $opt->uri,
     user     => $opt->user,
     password => $opt->password,
 );
-
-
 #
 # readonly get method
 #
@@ -46,21 +48,16 @@ say $dashboard->uri;
 say $dashboard->user;
 say $dashboard->password;
 
-#
-# must call connect()
-# before calling another method like mybugs()
-#
-#$dashboard->connect;
+my $max = $dashboard->get_max_attachment_id;
+say $max;
 
-#
-# retrurns Bugzilla::Dashboard::Bug items
-#
-my @bugs = $dashboard->mybugs;
-for my $bug (@bugs) {
-    say "ID: ", $bug->id;
-    say "    SUMMARY: ", $bug->summary;
-    say "    CREATOR: ", $bug->creator;
-    say "     ASSIGN: ", $bug->assigned_to;
-    say "     UPDATE: ", $bug->last_change_time;
-    say "     CREATE: ", $bug->creation_time;
+my $ret = $dashboard->attachments( $max - 9 .. $max );
+for my $aid ( reverse sort { $a <=> $b } keys %{ $ret->{attachments} } ) {
+    printf(
+        "Bug %d(%d): [%s]: %s\n",
+        $ret->{attachments}{$aid}{bug_id},
+        $ret->{attachments}{$aid}{id},
+        $ret->{attachments}{$aid}{file_name},
+        $ret->{attachments}{$aid}{summary},
+    );
 }

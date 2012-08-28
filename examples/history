@@ -1,0 +1,912 @@
+$VAR1 = {
+          'bugs' => [
+                      {
+                        'history' => [
+                                       {
+                                         'when' => '2011-12-08T11:17:39Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => "WBS \x{c2e4}\x{c2dc}\x{ac04} \x{d1b5}\x{bc88}\x{c5ed}\x{ae30} \x{acfc}\x{c81c} \x{c11c}\x{bc84} \x{bc31}\x{c5d4}\x{b4dc} \x{ad6c}\x{d604}\x{c758}\x{b8b0}",
+                                                          'added' => "WBS \x{c2e4}\x{c2dc}\x{ac04} \x{d1b5}\x{bc88}\x{c5ed}\x{ae30} \x{acfc}\x{c81c} - \x{d1b5}\x{c5ed} \x{c11c}\x{be44}\x{c2a4} \x{c778}\x{d504}\x{b77c} \x{ad6c}\x{cd95}",
+                                                          'field_name' => 'short_desc'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2011-12-11T17:20:26Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 419,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2011-12-15T13:39:49Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => 'wbs',
+                                                          'added' => 'diotek',
+                                                          'field_name' => 'alias'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2011-12-27T07:39:48Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => 'CONFIRMED',
+                                                          'added' => 'IN_PROGRESS',
+                                                          'field_name' => 'bug_status'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2011-12-28T08:56:35Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 437,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-02T15:39:27Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 415,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-03T01:41:39Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 450,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-03T01:42:07Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 451,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-05T08:42:39Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 452,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-05T08:43:17Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 453,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-06T01:26:18Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 420,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-06T01:30:47Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 421,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-06T01:56:52Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 466,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-06T01:57:26Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 467,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-06T02:08:07Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => "WBS \x{c2e4}\x{c2dc}\x{ac04} \x{d1b5}\x{bc88}\x{c5ed}\x{ae30} \x{acfc}\x{c81c} - \x{d1b5}\x{c5ed} \x{c11c}\x{be44}\x{c2a4} \x{c778}\x{d504}\x{b77c} \x{ad6c}\x{cd95}",
+                                                          'added' => "\x{d1b5}\x{c5ed} \x{c2dc}\x{bc94} \x{c11c}\x{be44}\x{c2a4}\x{b97c} \x{c704}\x{d55c} \x{d1b5}\x{c5ed}, \x{bc88}\x{c5ed}, TTS API \x{c11c}\x{bc84} \x{bc0f} \x{ad00}\x{b9ac} \x{d398}\x{c774}\x{c9c0} \x{ad6c}\x{d604}",
+                                                          'field_name' => 'short_desc'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-09T02:38:14Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '2012-04-13',
+                                                          'field_name' => 'deadline'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-10T07:50:18Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 482,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-11T08:00:25Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 506,
+                                                          'removed' => "\x{bcc4}\x{cca8}4 - MI \x{b77c}\x{c774}\x{c13c}\x{c2a4}",
+                                                          'added' => "\x{bcc4}\x{cca8}6 - Apache \x{b77c}\x{c774}\x{c13c}\x{c2a4}",
+                                                          'field_name' => 'attachments.description'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-11T08:05:34Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 472,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-12T06:28:59Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 497,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-12T06:29:05Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 498,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-18T08:26:13Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '200',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-25T11:54:55Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 511,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-25T11:55:33Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 512,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-31T06:15:22Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 504,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-31T06:15:33Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 505,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-31T06:15:42Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 506,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-31T06:15:58Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 507,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-01-31T06:16:07Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 508,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-08T03:37:36Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '202',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-08T17:26:18Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 558,
+                                                          'removed' => "WBS \x{110c}\x{1161}\x{1103}\x{1169}\x{11bc} \x{1110}\x{1169}\x{11bc}\x{110b}\x{1167}\x{11a8}\x{1100}\x{1175}.xlsx",
+                                                          'added' => "WBS \x{c790}\x{b3d9} \x{d1b5}\x{c5ed}\x{ae30}.xlsx",
+                                                          'field_name' => 'attachments.filename'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-09T06:16:08Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 569,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T05:07:55Z',
+                                         'who' => 'mintegrals@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => 'mintegrals@gmail.com',
+                                                          'field_name' => 'cc'
+                                                        },
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '205',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T05:10:19Z',
+                                         'who' => 'mintegrals@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '205',
+                                                          'added' => '',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T05:10:51Z',
+                                         'who' => 'mintegrals@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '205',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T05:11:34Z',
+                                         'who' => 'mintegrals@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '205',
+                                                          'added' => '',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T05:12:29Z',
+                                         'who' => 'mintegrals@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '205',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T05:13:25Z',
+                                         'who' => 'mintegrals@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '205',
+                                                          'added' => '',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T05:14:24Z',
+                                         'who' => 'mintegrals@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '205',
+                                                          'field_name' => 'blocked'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T05:14:42Z',
+                                         'who' => 'mintegrals@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '205',
+                                                          'added' => '',
+                                                          'field_name' => 'blocked'
+                                                        },
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '205',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T05:14:57Z',
+                                         'who' => 'mintegrals@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '205',
+                                                          'added' => '',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T05:15:09Z',
+                                         'who' => 'mintegrals@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '205',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T12:24:23Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 552,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T13:22:27Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 580,
+                                                          'removed' => "ETRI \x{1110}\x{1169}\x{11bc}\x{110b}\x{1167}\x{11a8}\x{1109}\x{1165}\x{1107}\x{1165} API_20120216b.pptx",
+                                                          'added' => "ETRI \x{d1b5}\x{c5ed}\x{c11c}\x{bc84} API_20120216b.ppt",
+                                                          'field_name' => 'attachments.filename'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T13:25:37Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 580,
+                                                          'removed' => "ETRI \x{d1b5}\x{c5ed}\x{c11c}\x{bc84} API",
+                                                          'added' => "ETRI \x{d1b5}\x{c5ed}\x{c11c}\x{bc84} API - 20120216b",
+                                                          'field_name' => 'attachments.description'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T13:25:55Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 581,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T13:31:34Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 580,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-16T13:32:11Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 580,
+                                                          'removed' => "ETRI \x{d1b5}\x{c5ed}\x{c11c}\x{bc84} API - 20120216b",
+                                                          'added' => "ETRI \x{d1b5}\x{c5ed}\x{c11c}\x{bc84} API - 20120216b - \x{c190}\x{c0c1}\x{b41c} \x{d30c}\x{c77c}",
+                                                          'field_name' => 'attachments.description'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-24T05:58:51Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 560,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-02-28T13:48:54Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 594,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-07T10:17:40Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '215',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-10T13:54:29Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 604,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-10T13:59:54Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 616,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-10T14:03:30Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 617,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-12T03:01:04Z',
+                                         'who' => 'aanoaa@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => 'aanoaa@gmail.com',
+                                                          'field_name' => 'cc'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-16T15:07:52Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '240',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-19T06:10:14Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '241',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-19T10:57:45Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '243',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-20T11:54:48Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 650,
+                                                          'removed' => "Abigail \x{baa8}\x{b4c8}\x{c758} \x{b2e8}\x{c704} \x{d14c}\x{c2a4}\x{d2b8} \x{acb0}\x{acfc}(jenkins junit xml) - \x{b514}\x{c624}\x{d14d} \x{c911}\x{ac04} \x{ac80}\x{c218}",
+                                                          'added' => "\x{b514}\x{c624}\x{d14d} \x{c911}\x{ac04} \x{ac80}\x{c218} - Abigail \x{baa8}\x{b4c8}\x{c758} \x{b2e8}\x{c704} \x{d14c}\x{c2a4}\x{d2b8} \x{acb0}\x{acfc}(jenkins junit xml)",
+                                                          'field_name' => 'attachments.description'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-20T11:54:56Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 649,
+                                                          'removed' => "Abigail \x{baa8}\x{b4c8}\x{c758} \x{b2e8}\x{c704} \x{d14c}\x{c2a4}\x{d2b8} \x{acb0}\x{acfc}(TAP) - \x{b514}\x{c624}\x{d14d} \x{c911}\x{ac04} \x{ac80}\x{c218}",
+                                                          'added' => "\x{b514}\x{c624}\x{d14d} \x{c911}\x{ac04} \x{ac80}\x{c218} - Abigail \x{baa8}\x{b4c8}\x{c758} \x{b2e8}\x{c704} \x{d14c}\x{c2a4}\x{d2b8} \x{acb0}\x{acfc}(TAP)",
+                                                          'field_name' => 'attachments.description'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-20T11:55:01Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 648,
+                                                          'removed' => "\x{d1b5}\x{d569} \x{d14c}\x{c2a4}\x{d2b8} \x{c124}\x{acc4}\x{c11c} - SILEX \x{c218}\x{c815}",
+                                                          'added' => "\x{b514}\x{c624}\x{d14d} \x{c911}\x{ac04} \x{ac80}\x{c218} - \x{d1b5}\x{d569} \x{d14c}\x{c2a4}\x{d2b8} \x{c124}\x{acc4}\x{c11c} - SILEX \x{c218}\x{c815}",
+                                                          'field_name' => 'attachments.description'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-20T11:55:07Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 647,
+                                                          'removed' => "P004 D170 BS01 \x{c0c1}\x{c138}\x{c124}\x{acc4}\x{c11c} \x{c11c}\x{be44}\x{c2a4} \x{c778}\x{d504}\x{b77c} - SILEX \x{c218}\x{c815}",
+                                                          'added' => "\x{b514}\x{c624}\x{d14d} \x{c911}\x{ac04} \x{ac80}\x{c218} - P004 D170 BS01 \x{c0c1}\x{c138}\x{c124}\x{acc4}\x{c11c} \x{c11c}\x{be44}\x{c2a4} \x{c778}\x{d504}\x{b77c} - SILEX \x{c218}\x{c815}",
+                                                          'field_name' => 'attachments.description'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-20T11:59:58Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 559,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        },
+                                                        {
+                                                          'attachment_id' => 624,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-21T07:53:39Z',
+                                         'who' => 'bots@silex.kr',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => 'bots@silex.kr',
+                                                          'field_name' => 'cc'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-26T01:50:35Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 549,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        },
+                                                        {
+                                                          'attachment_id' => 654,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-26T02:01:24Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'attachment_id' => 618,
+                                                          'removed' => '0',
+                                                          'added' => '1',
+                                                          'field_name' => 'attachments.isobsolete'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-27T18:18:03Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '244',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-29T06:11:21Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '245',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-03-29T07:00:09Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '246',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-04-02T02:15:09Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '249',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-04-05T09:21:54Z',
+                                         'who' => 'yongbin.yu@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '251',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-04-12T05:11:04Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '252',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-04-26T08:06:20Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '254',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-04-26T08:17:28Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => 'bots@silex.kr, mintegrals@gmail.com',
+                                                          'added' => '',
+                                                          'field_name' => 'cc'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-05-23T05:26:35Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '261',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       },
+                                       {
+                                         'when' => '2012-06-05T04:19:00Z',
+                                         'who' => 'keedi.k@gmail.com',
+                                         'changes' => [
+                                                        {
+                                                          'removed' => '',
+                                                          'added' => '266',
+                                                          'field_name' => 'dependson'
+                                                        }
+                                                      ]
+                                       }
+                                     ],
+                        'id' => 185,
+                        'alias' => 'diotek'
+                      }
+                    ]
+        };
+

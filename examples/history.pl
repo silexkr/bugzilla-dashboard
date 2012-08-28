@@ -37,30 +37,8 @@ my $dashboard = Bugzilla::Dashboard->new(
     user     => $opt->user,
     password => $opt->password,
 );
+$dashboard->connect;
+my $history = $dashboard->history(185);
 
-
-#
-# readonly get method
-#
-say $dashboard->uri;
-say $dashboard->user;
-say $dashboard->password;
-
-#
-# must call connect()
-# before calling another method like mybugs()
-#
-#$dashboard->connect;
-
-#
-# retrurns Bugzilla::Dashboard::Bug items
-#
-my @bugs = $dashboard->mybugs;
-for my $bug (@bugs) {
-    say "ID: ", $bug->id;
-    say "    SUMMARY: ", $bug->summary;
-    say "    CREATOR: ", $bug->creator;
-    say "     ASSIGN: ", $bug->assigned_to;
-    say "     UPDATE: ", $bug->last_change_time;
-    say "     CREATE: ", $bug->creation_time;
-}
+use Data::Dumper;
+say Dumper $history;

@@ -17,10 +17,13 @@ my ( $opt, $usage ) = describe_options(
         'user|u=s',  "username",
         { default => 'jeho.sung@silex.kr' }
     ],
-    [ 'password|w=s', "password" ],
+    [
+        'password|w=s', "password",
+        { default => '' }
+    ],
     [
         'uri=s',     "the URI to connect to",
-        { default => "http://jehos.silex.kr/bugzilla/jsonrpc.cgi" }
+        { default => "http://bugs.silex.kr/jsonrpc.cgi" }
     ],
     [ 'class|c=s',  "method class" ],
     [ 'method|m=s', "method" ],
@@ -47,7 +50,7 @@ say $dashboard->password;
 # must call connect()
 # before calling another method like mybugs()
 #
-#say Dumper $dashboard->connect;
+$dashboard->connect;
 
 #
 # retrurns Bugzilla::Dashboard::Bug items

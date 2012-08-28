@@ -50,11 +50,11 @@ my ( $opt, $usage ) = describe_options(
          'user|u=s', "username", 
         { default => 'jeho.sung@silex.kr' } 
       ],
-      [ 'passwd|w=s', "password" ],
+      [ 'password|w=s', "password" ],
       [
         'uri=s',
         "the URI to connect to",
-        { default => "http://jehos.silex.kr/bugzilla/jsonrpc.cgi" }
+        { default => "http://bugs.silex.kr/jsonrpc.cgi" }
       ],
       [ 'class|c=s',  "method class"   ],
       [ 'method|m=s', "method"         ],
@@ -67,7 +67,7 @@ my ( $opt, $usage ) = describe_options(
 my $client = JSON::RPC::Legacy::Client->new;
 my $URI = $opt->uri;
 my $user = $opt->user;
-my $passwd = $opt->passwd;
+my $password = $opt->password;
 #my $method_params = $opt->class . "." . $opt->method;
 
 say $usage->text if $opt->help;
@@ -78,7 +78,7 @@ my $res = $client->call(
         method => 'User.login',
         params => {
             login    => $user,
-            password => $passwd,
+            password => $password,
         }
     }
 );

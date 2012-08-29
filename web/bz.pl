@@ -66,9 +66,9 @@ sub recent_comments {
 
     my $dashboard = Bugzilla::Dashboard->new(
         uri      => $uri,
-        user     => $user,
+        user     => $username,
         password => $password,
-    ) # you have to login to call method
+    ); # you have to login to call method
 
     return $dashboard->recent_comments( $dt, $limit );
 }

@@ -1,6 +1,8 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
 
+use Bugzilla::Dashboard;
+
 # Documentation browser under "/perldoc"
 plugin 'PODRenderer';
 
@@ -24,6 +26,14 @@ get '/recent-comments' => sub {
 sub recent_comments {
     my ($dt, $limit) = @_;
     # B::D::Comment 에 대한 array 를 주십시오
+
+    my $dashboard = Bugzilla::Dashboard->new(
+        uri      => $opt->uri,
+        user     => $opt->user,
+        password => $opt->password,
+    ) # you have to login to call method
+
+    return $dashboard->recent_comments( $dt, $limit );
 }
 
 app->start;

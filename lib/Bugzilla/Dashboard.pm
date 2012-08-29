@@ -361,6 +361,8 @@ sub recent_comments {
         } keys %{ $result->{bugs} }
     );
 
+    @comments = ( sort { $b->id <=> $a->id } @comments )[0..$limit];
+
     return @comments;
 }
 

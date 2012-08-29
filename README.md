@@ -27,7 +27,7 @@ Bugzilla 에 다음의 기능을 제공하는 DashBoard 구현을 목표로
 - `BZ_DASHBOARD_PASSOWRD` - **required**
 - `BZ_DASHBOARD_URI` - optional. 'http://bugs.silex.kr/jsonrpc.cgi' as default
 
-    $ export BZ_DASHBOARD_USERNAME="your@email.com"
-    $ export BZ_DASHBOARD_PASSWORD="s3cr3t passw0rd"
-    $ export BZ_DASHBOARD_URI="http://bugs.silex.kr/jsonrpc.cgi"
-    $ prove -l
+        $ export BZ_DASHBOARD_USERNAME="your@email.com"
+        $ export BZ_DASHBOARD_PASSWORD="s3cr3t passw0rd"
+        $ export BZ_DASHBOARD_URI="http://bugs.silex.kr/jsonrpc.cgi"
+        $ prove -l

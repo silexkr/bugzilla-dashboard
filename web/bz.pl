@@ -27,10 +27,15 @@ sub recent_comments {
     my ($dt, $limit) = @_;
     # B::D::Comment 에 대한 array 를 주십시오
 
+    # account will lookup %ENV
+    my $uri      = $ENV{BZ_DASHBOARD_URI}      || 'http://bugs.silex.kr/jsonrpc.cgi';
+    my $username = $ENV{BZ_DASHBOARD_USERNAME} || ''; 
+    my $password = $ENV{BZ_DASHBOARD_PASSWORD} || ''; 
+
     my $dashboard = Bugzilla::Dashboard->new(
-        uri      => $opt->uri,
-        user     => $opt->user,
-        password => $opt->password,
+        uri      => $uri,
+        user     => $user,
+        password => $password,
     ) # you have to login to call method
 
     return $dashboard->recent_comments( $dt, $limit );

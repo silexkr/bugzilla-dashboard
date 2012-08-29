@@ -53,6 +53,38 @@ any '/recent-comments' => sub {
     );
 };
 
+
+any '/recent-attachments' => sub {
+    my $self = shift;
+
+    my $param = $self->req->params->to_hash;
+    $param->{limit} ||= 10;
+
+    # Validation Rule
+    my $rule = [
+        limit => [
+            'int'
+        ],
+    ];
+
+    my $vresult = $vc->validate($param, $rule);
+    if ($vresult->is_ok) {
+        $self->stash(view => {
+            attachments => [recent_attachments($param->{limit})],
+        });
+    } else {
+        $self->stash(view => {
+            error => 'validation failed',
+        });
+    }
+
+    my $html = $self->render_partial('recent-attachments')->to_string;
+    $self->render_text(
+        HTML::FillInForm::Lite->fill(\$html, $param),
+        format => 'html'
+    );
+};
+
 sub recent_comments {
     my ($dt, $limit) = @_;
     # B::D::Comment 에 대한 array 를 주십시오
@@ -69,6 +101,22 @@ sub recent_comments {
     ); # you have to login to call method
 
     return $dashboard->recent_comments( $dt, $limit );
+}
+
+sub recent_attachments {
+    my $limit = shift;
+
+    my $uri      = $ENV{BZ_DASHBOARD_URI}      || 'http://bugs.silex.kr/jsonrpc.cgi';
+    my $username = $ENV{BZ_DASHBOARD_USERNAME} || ''; 
+    my $password = $ENV{BZ_DASHBOARD_PASSWORD} || ''; 
+
+    my $dashboard = Bugzilla::Dashboard->new(
+        uri      => $uri,
+        user     => $username,
+        password => $password,
+    ); # you have to login to call method
+
+    return $dashboard->recent_attachments($limit);
 }
 
 app->start;
@@ -109,6 +157,42 @@ Welcome to the Mojolicious real-time web framework!
       <td><%= $comment->creator %></td>
       <td><%= $comment->time %></td>
       <td title="<%= $comment->text %>"><%= substr($comment->text, 0, 10) %></td>
+    </tr>
+    % }
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+
+
+@@ recent-attachments.html.ep
+% layout 'default';
+% title '최근 추가된 첨부파일';
+% if ($view->{error}) {
+<div class="error"><%= $view->{error} %></div>
+% }
+<form method="post" enctype="application/x-www-form-urlencoded">
+  <input type="text" name="limit" placeholder="갯수" />
+  <input type="submit" value="새로고침" />
+</form>
+<table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>버그 ID</th>
+      <th>파일명</th>
+      <th>크기</th>
+      <th>요약</th>
+      <th>작성자</th>
+      <th>수정시간</th>
+    </tr>
+    % foreach my $attachment (@{ $view->{attachments} }) {
+    <tr>
+      <td><%= $attachment->bug_id %></td>
+      <td><%= $attachment->file_name %></td>
+      <td><%= $attachment->size %></td>
+      <td><%= $attachment->summary %></td>
+      <td><%= $attachment->creator %></td>
+      <td><%= $attachment->creation_time %></td>
     </tr>
     % }
   </thead>

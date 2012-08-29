@@ -80,6 +80,11 @@ __DATA__
 % layout 'default';
 % title 'Welcome';
 Welcome to the Mojolicious real-time web framework!
+<ul>
+  <li>
+    <a href="/recent-comments">recent comments</a>
+  </li>
+</ul>
 
 @@ recent-comments.html.ep
 % layout 'default';

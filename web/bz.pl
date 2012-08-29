@@ -107,8 +107,8 @@ Welcome to the Mojolicious real-time web framework!
     <tr>
       <td><%= $comment->bug_id %></td>
       <td><%= $comment->creator %></td>
-      <td><%= $comment->creation_time %></td>
-      <td><%= $comment->text %></td>
+      <td><%= $comment->time %></td>
+      <td title="<%= $comment->text %>"><%= substr($comment->text, 0, 10) %></td>
     </tr>
     % }
     <tr>

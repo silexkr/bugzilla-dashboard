@@ -111,12 +111,6 @@ Welcome to the Mojolicious real-time web framework!
       <td title="<%= $comment->text %>"><%= substr($comment->text, 0, 10) %></td>
     </tr>
     % }
-    <tr>
-      <td>286</td>
-      <td>Jeho Sung</td>
-      <td>12:23:00</td>
-      <td>"완료하엿.."</td>
-    </tr>
   </thead>
   <tbody>
   </tbody>

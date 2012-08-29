@@ -37,10 +37,8 @@ any '/recent-comments' => sub {
 
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
-        my @comments = recent_comments(DateTime::Format::ISO8601->parse_datetime($param->{date}), $param->{limit}) || ();
-
         $self->stash(view => {
-            comments => \@comments,
+            comments => [recent_comments(DateTime::Format::ISO8601->parse_datetime($param->{date}), $param->{limit})],
         });
     } else {
         $self->stash(view => {

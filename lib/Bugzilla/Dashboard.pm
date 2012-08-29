@@ -10,6 +10,7 @@ use List::Util qw( max );
 
 use Bugzilla::Dashboard::Bug;
 use Bugzilla::Dashboard::Attachment;
+use Bugzilla::Dashboard::Comment;
 
 {
     package JSON::RPC::Legacy::ReturnObject; 
@@ -203,7 +204,7 @@ sub attachments {
 
     my $client = $self->_jsonrpc;
     my $res = $client->call(
-        $self->{uri},
+        $self->uri,
         { # callobj
             method => "Bug.attachments",
             params => {
@@ -282,6 +283,85 @@ sub recent_attachments {
     my @attachments = reverse sort { $a->id <=> $b->id } $self->attachments( $start .. $end );
 
     return @attachments;
+}
+
+sub recent_comments {
+    my ( $self, $dt, $limit ) = @_;
+
+    return unless $self->_jsonrpc;
+    return unless $self->_cookie;
+    return unless $dt;
+    return unless $limit;
+
+    my $iso8601_str = $dt->strftime('%Y-%m-%dT%H:%M:%S%z');
+
+    my $client = $self->_jsonrpc;
+    my $res = $client->call(
+        $self->uri,
+        { # callobj
+            method => "Bug.search",
+            params => {
+                last_change_time => $iso8601_str,
+                include_fields   => [qw( id )],
+            },
+        },
+        $self->_cookie,
+    );
+    
+    unless ($res) {
+        $self->{_error} = $client->status_line;
+        return;
+    }
+    
+    if ( $res->is_error ) {
+        $self->{_error} = $res->error_message;
+        return;
+    }
+
+    my @bugs = @{ $res->result->{bugs} };
+    return unless @bugs;
+
+    my @bug_ids;
+    for my $bug_id (@bugs) {
+        push @bug_ids, $bug_id->{id};
+    }
+
+    $res = $client->call(
+        $self->uri,
+        { # callobj
+            method => "Bug.comments",
+            params => {
+                ids => \@bug_ids,
+                new_since => $iso8601_str,
+            },
+        },
+        $self->_cookie,
+    );
+    
+    unless ($res) {
+        $self->{_error} = $client->status_line;
+        return;
+    }
+    
+    if ( $res->is_error ) {
+        $self->{_error} = $res->error_message;
+        return;
+    }
+
+    my $result = $res->result;
+    return unless $result;
+    return unless $result->{bugs};
+
+    my @comments = Bugzilla::Dashboard::Comment->new(
+        map {
+            my $bugid = $_;
+            my $cinfo = $result->{bugs}{$bugid}{comments};
+
+            @$cinfo ? @$cinfo : ();
+        } keys %{ $result->{bugs} }
+    );
+
+    return @comments;
 }
 
 1;

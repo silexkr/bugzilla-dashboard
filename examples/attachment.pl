@@ -5,34 +5,26 @@ use utf8;
 use strict;
 use warnings;
 
-use Data::Dumper;
 use Getopt::Long::Descriptive;
-use List::Util qw( max );
 
 use Bugzilla::Dashboard;
 
 binmode STDOUT, ':utf8';
 
 my ( $opt, $usage ) = describe_options(
-    "$0 <category> <method> [ <attachment id> ... ]",
-    [
-        'user|u=s',  "username",
-        { default => 'jeho.sung@silex.kr' }
-    ],
-    [
-        'password|w=s', "password",
-        { default => '' }
-    ],
+    "%c %o ... ",
+    [ 'user|u=s',     "username" ],
+    [ 'password|p=s', "password" ],
     [
         'uri=s',     "the URI to connect to",
-        { default => "http://bugs.silex.kr/jsonrpc.cgi" }
+        { default => "http://bugs.silex.kr/jsonrpc.cgi" },
     ],
-    [ 'class|c=s',  "method class" ],
-    [ 'method|m=s', "method" ],
     [],
-    [ 'verbose|v', "print detail" ],
-    [ 'help|h',    "print this" ],
+    [ 'help|h',    "print usage" ],
 );
+
+print($usage->text), exit unless $opt->user;
+print($usage->text), exit unless $opt->password;
 
 my $dashboard = Bugzilla::Dashboard->new(
     uri      => $opt->uri,
@@ -40,7 +32,8 @@ my $dashboard = Bugzilla::Dashboard->new(
     password => $opt->password,
 ) or die "cannot connect to json-rpc server\n";
 
-my @attachments = $dashboard->recent_attachments(20); # number of recent attachments to fetch
+# fetch recent 20 attachments
+my @attachments = $dashboard->recent_attachments(20);
 for my $attachment (@attachments) {
     say "ID: ",                $attachment->id;
     say "    BUGID: ",         $attachment->bug_id;

@@ -13,3 +13,17 @@ Bugzilla 에 다음의 기능을 제공하는 DashBoard 구현을 목표로
 - 빠른 이슈 생성 창 추가 ( bug 290 )
 - 각 사용자별의 사용 통계표 제공 ( bug 291 )
 - IRC Notification (optional) ( bug 292 )
+
+
+### TEST ###
+
+3개의 `env` 가 필요합니다.
+
+- `BZ_DASHBOARD_USERNAME` - **required**
+- `BZ_DASHBOARD_PASSOWRD` - **required**
+- `BZ_DASHBOARD_URI` - optional. 'http://bugs.silex.kr/jsonrpc.cgi' as default
+
+    $ export BZ_DASHBOARD_USERNAME="your@email.com"
+    $ export BZ_DASHBOARD_PASSWORD="s3cr3t passw0rd"
+    $ export BZ_DASHBOARD_URI="http://bugs.silex.kr/jsonrpc.cgi"
+    $ prove -l

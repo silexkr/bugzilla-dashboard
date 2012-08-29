@@ -9,6 +9,23 @@ get '/' => sub {
   $self->render('index');
 };
 
+get '/recent-comments' => sub {
+    my $self = shift;
+
+    my $dt    = $self->param('date');
+    my $limit = $self->param('limit');
+    my @comments = recent_comments($dt, $limit);
+    $self->stash(view => {
+        comments => []
+    });
+    $self->render('recent-comments');
+};
+
+sub recent_comments {
+    my ($dt, $limit) = @_;
+    # B::D::Comment 에 대한 array 를 주십시오
+}
+
 app->start;
 __DATA__
 

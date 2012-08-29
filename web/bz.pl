@@ -109,8 +109,8 @@ Welcome to the Mojolicious real-time web framework!
       <td><%= $comment->bug_id %></td>
       <td><em>TODO</em> 제목을 가져오는 method 는 Bugzilla::Dashboard::Comment 에 없습니다.</td>
       <td><%= $comment->creator %></td>
-      <td><%= $comment->creation_time %></td>
-      <td><%= $comment->text %></td>
+      <td><%= $comment->time %></td>
+      <td title="<%= $comment->text %>"><%= substr($comment->text, 0, 10) %></td>
     </tr>
     % }
     <tr>

@@ -20,6 +20,10 @@ Welcome to the Mojolicious real-time web framework!
 @@ layouts/default.html.ep
 <!DOCTYPE html>
 <html>
-  <head><title><%= title %></title></head>
+  <head>
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css" rel="stylesheet">
+    <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js"></script>
+    <title><%= title %></title>
+  </head>
   <body><%= content %></body>
 </html>

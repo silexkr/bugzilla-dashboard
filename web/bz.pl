@@ -99,7 +99,6 @@ Welcome to the Mojolicious real-time web framework!
   <thead>
     <tr>
       <th>버그 ID</th>
-      <th>제목</th>
       <th>작성자</th>
       <th>변경시간</th>
       <th>댓글요약</th>
@@ -107,7 +106,6 @@ Welcome to the Mojolicious real-time web framework!
     % foreach my $comment (@{ $view->{comments} }) {
     <tr>
       <td><%= $comment->bug_id %></td>
-      <td><em>TODO</em> 제목을 가져오는 method 는 Bugzilla::Dashboard::Comment 에 없습니다.</td>
       <td><%= $comment->creator %></td>
       <td><%= $comment->creation_time %></td>
       <td><%= $comment->text %></td>
@@ -115,7 +113,6 @@ Welcome to the Mojolicious real-time web framework!
     % }
     <tr>
       <td>286</td>
-      <td>"최근변경이력"</td>
       <td>Jeho Sung</td>
       <td>12:23:00</td>
       <td>"완료하엿.."</td>

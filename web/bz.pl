@@ -95,7 +95,7 @@ Welcome to the Mojolicious real-time web framework!
   <input type="text" name="limit" placeholder="갯수" />
   <input type="submit" value="새로고침" />
 </form>
-<table>
+<table class="table table-striped table-bordered table-hover">
   <thead>
     <tr>
       <th>버그 ID</th>

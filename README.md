@@ -14,6 +14,10 @@ Bugzilla 에 다음의 기능을 제공하는 DashBoard 구현을 목표로
 - 각 사용자별의 사용 통계표 제공 ( bug 291 )
 - IRC Notification (optional) ( bug 292 )
 
+### RUN ###
+
+    $ cd web/
+    $ plackup bz.pl # HTTP::Server::PSGI: Accepting connections at http://0:5000/
 
 ### TEST ###
 

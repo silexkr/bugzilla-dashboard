@@ -15,13 +15,16 @@ my ( $opt, $usage ) = describe_options(
     "%c %o ... ",
     [ 'user|u=s',     "username" ],
     [ 'password|p=s', "password" ],
+    [ 'id=s',         "what you want?" ],
     [
-        'uri=s',     "the URI to connect to",
-        { default => "http://bugs.silex.kr/jsonrpc.cgi" },
+       'uri=s',       "the URI to connect to",
+       { default => "http://bugs.silex.kr/jsonrpc.cgi" },
     ],
     [],
-    [ 'help|h',    "print usage" ],
+    [ 'help|h',       "print usage" ],
 );
+
+my $user = $opt->id;
 
 print($usage->text), exit unless $opt->user;
 print($usage->text), exit unless $opt->password;
@@ -32,7 +35,7 @@ my $dashboard = Bugzilla::Dashboard->new(
     password => $opt->password,
 ) or die "cannot connect to json-rpc server\n";
 
-my @bugs = $dashboard->mybugs;
+my @bugs = $dashboard->mybugs($user);
 for my $bug (@bugs) {
     say "ID: ", $bug->id;
     say "    SUMMARY: ", $bug->summary;

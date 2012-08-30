@@ -13,7 +13,7 @@ use Bugzilla::Dashboard::Attachment;
 use Bugzilla::Dashboard::Comment;
 
 {
-    package JSON::RPC::Legacy::ReturnObject; 
+    package JSON::RPC::Legacy::ReturnObject;
     {
         no warnings 'redefine';
         sub new {
@@ -102,7 +102,7 @@ sub connect {
                 password => $self->{password},
             }
         }
-    ); 
+    );
 
     unless ($res) {
         $self->{_error} = $client->status_line;
@@ -113,7 +113,7 @@ sub connect {
         $self->{_error} = $res->error_message;
         return;
     }
-        
+
     #
     # extract cookie and add cookie
     #
@@ -124,7 +124,9 @@ sub connect {
 }
 
 sub mybugs {
-    my $self = shift;
+    my ( $self, $user ) = @_;
+
+    $user ||= $self->user;
 
     return unless $self->_jsonrpc;
     return unless $self->_cookie;
@@ -134,13 +136,32 @@ sub mybugs {
     #
     my $client = $self->_jsonrpc;
     my $res = $client->call(
-        $self->{uri},
+        $self->uri,
         { # callobj
             method => "Bug.search",
             params => {
-                assigned_to => [ $self->{user} ],
-            },  
-        },  
+                assigned_to => [ $user ],
+                include_fields => [qw(
+                    priority
+                    creator
+                    blocks
+                    last_change_time
+                    assigned_to
+                    creation_time
+                    id
+                    depends_on
+                    resolution
+                    classification
+                    alias
+                    status
+                    summary
+                    deadline
+                    component
+                    product
+                    is_open
+                )],
+            },
+        },
         $self->_cookie,
     );
 
@@ -177,8 +198,8 @@ sub history {
             method => "Bug.history",
             params => {
                 ids => \@ids,
-            },  
-        },  
+            },
+        },
         $self->_cookie,
     );
 
@@ -223,8 +244,8 @@ sub attachments {
                     size
                     summary
                 )],
-            },  
-        },  
+            },
+        },
         $self->_cookie,
     );
 
@@ -307,12 +328,12 @@ sub recent_comments {
         },
         $self->_cookie,
     );
-    
+
     unless ($res) {
         $self->{_error} = $client->status_line;
         return;
     }
-    
+
     if ( $res->is_error ) {
         $self->{_error} = $res->error_message;
         return;
@@ -337,12 +358,12 @@ sub recent_comments {
         },
         $self->_cookie,
     );
-    
+
     unless ($res) {
         $self->{_error} = $client->status_line;
         return;
     }
-    
+
     if ( $res->is_error ) {
         $self->{_error} = $res->error_message;
         return;

@@ -85,14 +85,46 @@ any '/recent-attachments' => sub {
     );
 };
 
+any '/mybugs' => sub {
+    my $self = shift;
+
+    my $param = $self->req->params->to_hash;
+    $param->{user};
+
+    # Validation Rule
+    my $rule = [
+        user => [
+            'not_blank',
+        ],
+    ];
+
+    my $vresult = $vc->validate($param, $rule);
+    if ($vresult->is_ok) {
+        $self->stash(view => {
+            bug => [mybugs($param->{user})],
+        });
+    }
+    else {
+        $self->stash(view => {
+            error => 'validation failed',
+        });
+    }
+
+    my $html = $self->render_partial('mybugs')->to_string;
+    $self->render_text(
+        HTML::FillInForm::Lite->fill(\$html, $param),
+        format => 'html'
+    );
+};
+
 sub recent_comments {
-    my ($dt, $limit) = @_;
+    my ( $dt, $limit ) = @_;
     # B::D::Comment 에 대한 array 를 주십시오
 
     # account will lookup %ENV
     my $uri      = $ENV{BZ_DASHBOARD_URI}      || 'http://bugs.silex.kr/jsonrpc.cgi';
-    my $username = $ENV{BZ_DASHBOARD_USERNAME} || ''; 
-    my $password = $ENV{BZ_DASHBOARD_PASSWORD} || ''; 
+    my $username = $ENV{BZ_DASHBOARD_USERNAME} || '';
+    my $password = $ENV{BZ_DASHBOARD_PASSWORD} || '';
 
     my $dashboard = Bugzilla::Dashboard->new(
         uri      => $uri,
@@ -107,8 +139,8 @@ sub recent_attachments {
     my $limit = shift;
 
     my $uri      = $ENV{BZ_DASHBOARD_URI}      || 'http://bugs.silex.kr/jsonrpc.cgi';
-    my $username = $ENV{BZ_DASHBOARD_USERNAME} || ''; 
-    my $password = $ENV{BZ_DASHBOARD_PASSWORD} || ''; 
+    my $username = $ENV{BZ_DASHBOARD_USERNAME} || '';
+    my $password = $ENV{BZ_DASHBOARD_PASSWORD} || '';
 
     my $dashboard = Bugzilla::Dashboard->new(
         uri      => $uri,
@@ -119,7 +151,24 @@ sub recent_attachments {
     return $dashboard->recent_attachments($limit);
 }
 
+sub mybugs {
+    my $user = shift;
+
+    my $uri      = $ENV{BZ_DASHBOARD_URI}      || 'http://bugs.silex.kr/jsonrpc.cgi';
+    my $username = $ENV{BZ_DASHBOARD_USERNAME} || '';
+    my $password = $ENV{BZ_DASHBOARD_PASSWORD} || '';
+
+    my $dashboard = Bugzilla::Dashboard->new(
+        uri      => $uri,
+        user     => $username,
+        password => $password,
+    );
+
+    return $dashboard->mybugs($user);
+}
+
 app->start;
+
 __DATA__
 
 @@ index.html.ep
@@ -193,6 +242,40 @@ Welcome to the Mojolicious real-time web framework!
       <td><%= $attachment->summary %></td>
       <td><%= $attachment->creator %></td>
       <td><%= $attachment->creation_time %></td>
+    </tr>
+    % }
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+
+
+@@ mybugs.html.ep
+% layout 'default';
+% title '내가 참여한 이슈';
+% if ($view->{error}) {
+<div class="error"><%= $view->{error} %></div>
+% }
+<form method="post" enctype="application/x-www-form-urlencoded">
+  <input type="text" name="user" placeholder="검색할 사용자" />
+  <input type="submit" value="새로고침" />
+</form>
+<table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>버그 ID</th>
+      <th>작성자</th>
+      <th>제목</th>
+      <th>변경시간</th>
+      <th>상태</th>
+    </tr>
+    % foreach my $bug (@{ $view->{bug} }) {
+    <tr>
+      <td><%= $bug->id %></td>
+      <td><%= $bug->creator %></td>
+      <td><%= $bug->summary %></td>
+      <td><%= $bug->last_change_time %></td>
+      <td><%= $bug->status %></td>
     </tr>
     % }
   </thead>

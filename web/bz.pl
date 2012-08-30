@@ -1,22 +1,25 @@
 #!/usr/bin/env perl
-use utf8;
-use Mojolicious::Lite;
-use DateTime;
-use Validator::Custom;
-use DateTime::Format::ISO8601;
-use HTML::FillInForm::Lite ();
 
-my $vc = Validator::Custom->new;
+use utf8;
+
+use Mojolicious::Lite;
+
+use DateTime::Format::ISO8601;
+use DateTime;
+use HTML::FillInForm::Lite ();
+use Validator::Custom;
 
 use Bugzilla::Dashboard;
 
-# Documentation browser under "/perldoc"
-plugin 'PODRenderer';
+my $vc = Validator::Custom->new;
 
-get '/' => sub {
-  my $self = shift;
-  $self->render('index');
-};
+my $dashboard = Bugzilla::Dashboard->new(
+    uri      => $ENV{BZ_DASHBOARD_URI},
+    user     => $ENV{BZ_DASHBOARD_USER},
+    password => $ENV{BZ_DASHBOARD_PASSWORD},
+) or die "cannot connect to bugzilla dashboard\n";
+
+get '/' => 'index';
 
 any '/recent-comments' => sub {
     my $self = shift;
@@ -27,23 +30,19 @@ any '/recent-comments' => sub {
 
     # Validation Rule
     my $rule = [
-        date => [
-            'date_to_timepiece'
-        ],
-        limit => [
-            'int'
-        ],
+        date  => [ 'date_to_timepiece' ],
+        limit => [ 'int' ],
     ];
 
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
-        $self->stash(view => {
-            comments => [recent_comments(DateTime::Format::ISO8601->parse_datetime($param->{date}), $param->{limit})],
-        });
+        my @comments = $dashboard->recent_comments(
+            DateTime::Format::ISO8601->parse_datetime($param->{date}),
+            $param->{limit},
+        );
+        $self->stash( view => { comments => \@comments } );
     } else {
-        $self->stash(view => {
-            error => 'validation failed',
-        });
+        $self->stash( view => { error => 'validation failed' } );
     }
 
     my $html = $self->render_partial('recent-comments')->to_string;
@@ -53,7 +52,6 @@ any '/recent-comments' => sub {
     );
 };
 
-
 any '/recent-attachments' => sub {
     my $self = shift;
 
@@ -61,21 +59,14 @@ any '/recent-attachments' => sub {
     $param->{limit} ||= 10;
 
     # Validation Rule
-    my $rule = [
-        limit => [
-            'int'
-        ],
-    ];
+    my $rule = [ limit => [ 'int' ] ];
 
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
-        $self->stash(view => {
-            attachments => [recent_attachments($param->{limit})],
-        });
+        my @attachments = $dashboard->recent_attachments($param->{limit});
+        $self->stash( view => { attachments => \@attachments } );
     } else {
-        $self->stash(view => {
-            error => 'validation failed',
-        });
+        $self->stash( view => { error => 'validation failed' } );
     }
 
     my $html = $self->render_partial('recent-attachments')->to_string;
@@ -89,25 +80,17 @@ any '/mybugs' => sub {
     my $self = shift;
 
     my $param = $self->req->params->to_hash;
-    $param->{user};
 
     # Validation Rule
-    my $rule = [
-        user => [
-            'not_blank',
-        ],
-    ];
+    my $rule = [ user => [ 'not_blank' ] ];
 
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
-        $self->stash(view => {
-            bug => [mybugs($param->{user})],
-        });
+        my @mybugs = $dashboard->mybugs($param->{user});
+        $self->stash( view => { bug => \@mybugs } );
     }
     else {
-        $self->stash(view => {
-            error => 'validation failed',
-        });
+        $self->stash( view => { error => 'validation failed' } );
     }
 
     my $html = $self->render_partial('mybugs')->to_string;
@@ -116,56 +99,6 @@ any '/mybugs' => sub {
         format => 'html'
     );
 };
-
-sub recent_comments {
-    my ( $dt, $limit ) = @_;
-    # B::D::Comment 에 대한 array 를 주십시오
-
-    # account will lookup %ENV
-    my $uri      = $ENV{BZ_DASHBOARD_URI}      || 'http://bugs.silex.kr/jsonrpc.cgi';
-    my $username = $ENV{BZ_DASHBOARD_USERNAME} || '';
-    my $password = $ENV{BZ_DASHBOARD_PASSWORD} || '';
-
-    my $dashboard = Bugzilla::Dashboard->new(
-        uri      => $uri,
-        user     => $username,
-        password => $password,
-    ); # you have to login to call method
-
-    return $dashboard->recent_comments( $dt, $limit );
-}
-
-sub recent_attachments {
-    my $limit = shift;
-
-    my $uri      = $ENV{BZ_DASHBOARD_URI}      || 'http://bugs.silex.kr/jsonrpc.cgi';
-    my $username = $ENV{BZ_DASHBOARD_USERNAME} || '';
-    my $password = $ENV{BZ_DASHBOARD_PASSWORD} || '';
-
-    my $dashboard = Bugzilla::Dashboard->new(
-        uri      => $uri,
-        user     => $username,
-        password => $password,
-    ); # you have to login to call method
-
-    return $dashboard->recent_attachments($limit);
-}
-
-sub mybugs {
-    my $user = shift;
-
-    my $uri      = $ENV{BZ_DASHBOARD_URI}      || 'http://bugs.silex.kr/jsonrpc.cgi';
-    my $username = $ENV{BZ_DASHBOARD_USERNAME} || '';
-    my $password = $ENV{BZ_DASHBOARD_PASSWORD} || '';
-
-    my $dashboard = Bugzilla::Dashboard->new(
-        uri      => $uri,
-        user     => $username,
-        password => $password,
-    );
-
-    return $dashboard->mybugs($user);
-}
 
 app->start;
 
@@ -176,9 +109,9 @@ __DATA__
 % title 'Welcome';
 Welcome to the Mojolicious real-time web framework!
 <ul>
-  <li>
-    <a href="/recent-comments">recent comments</a>
-  </li>
+  <li> <a href="/recent-comments">recent comments</a> </li>
+  <li> <a href="/recent-attachments">recent attachments</a> </li>
+  <li> <a href="/mybugs">mybugs</a> </li>
 </ul>
 
 @@ recent-comments.html.ep

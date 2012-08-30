@@ -50,7 +50,6 @@ sub new {
         _jsonrpc => JSON::RPC::Legacy::Client->new,
     }, $class;
 
-    # 이해 안가는 부분
     $self->connect or return;
 
     return $self;
@@ -94,12 +93,12 @@ sub connect {
 
     my $client = $self->_jsonrpc;
     my $res = $client->call(
-        $self->{uri},
+        $self->uri,
         { # callobj
             method => 'User.login',
             params => {
-                login    => $self->{user},
-                password => $self->{password},
+                login    => $self->user,
+                password => $self->password,
             }
         }
     );
@@ -111,6 +110,7 @@ sub connect {
 
     if ( $res->is_error ) {
         $self->{_error} = $res->error_message;
+        warn $res->error_message;
         return;
     }
 
@@ -193,7 +193,7 @@ sub history {
 
     my $client = $self->_jsonrpc;
     my $res = $client->call(
-        $self->{uri},
+        $self->uri,
         { # callobj
             method => "Bug.history",
             params => {
@@ -382,7 +382,7 @@ sub recent_comments {
         } keys %{ $result->{bugs} }
     );
 
-    @comments = ( sort { $b->id <=> $a->id } @comments )[0..$limit-1];
+    @comments = ( sort { $b->id <=> $a->id } @comments )[ 0 .. $limit-1 ];
 
     return @comments;
 }

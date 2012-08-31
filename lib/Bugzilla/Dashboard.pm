@@ -123,24 +123,18 @@ sub connect {
     return $client;
 }
 
-sub mybugs {
-    my ( $self, $user ) = @_;
-
-    $user ||= $self->user;
+sub search {
+    my ( $self, %params ) = @_;
 
     return unless $self->_jsonrpc;
     return unless $self->_cookie;
 
-    #
-    # get user info
-    #
     my $client = $self->_jsonrpc;
     my $res = $client->call(
         $self->uri,
         { # callobj
             method => "Bug.search",
             params => {
-                assigned_to => [ $user ],
                 include_fields => [qw(
                     priority
                     creator
@@ -160,18 +154,19 @@ sub mybugs {
                     product
                     is_open
                 )],
+                %params,
             },
         },
         $self->_cookie,
     );
 
     unless ($res) {
-        $self->{_error} = $client->status_line;
+        $self->{_error} = 'Bug.search: ' . $client->status_line;
         return;
     }
 
     if ( $res->is_error ) {
-        $self->{_error} = $res->error_message;
+        $self->{_error} = 'Bug.search: ' . $res->error_message;
         return;
     }
 
@@ -180,6 +175,16 @@ sub mybugs {
     return unless $result->{bugs};
 
     my @bugs = Bugzilla::Dashboard::Bug->new( @{ $result->{bugs} } );
+
+    return @bugs;
+}
+
+sub mybugs {
+    my ( $self, $user ) = @_;
+
+    my @bugs = $self->search(
+        assigned_to => [ $user || $self->user ],
+    );
 
     return @bugs;
 }
@@ -309,50 +314,24 @@ sub recent_attachments {
 sub recent_comments {
     my ( $self, $dt, $limit ) = @_;
 
-    return unless $self->_jsonrpc;
-    return unless $self->_cookie;
     return unless $dt;
     return unless $limit;
 
     my $iso8601_str = $dt->strftime('%Y-%m-%dT%H:%M:%S%z');
 
+    my @bugs = $self->search(
+        last_change_time => $iso8601_str,
+        include_fields   => [qw( id )],
+    );
+    return unless @bugs;
+
     my $client = $self->_jsonrpc;
     my $res = $client->call(
         $self->uri,
         { # callobj
-            method => "Bug.search",
-            params => {
-                last_change_time => $iso8601_str,
-                include_fields   => [qw( id )],
-            },
-        },
-        $self->_cookie,
-    );
-
-    unless ($res) {
-        $self->{_error} = $client->status_line;
-        return;
-    }
-
-    if ( $res->is_error ) {
-        $self->{_error} = $res->error_message;
-        return;
-    }
-
-    my @bugs = @{ $res->result->{bugs} };
-    return unless @bugs;
-
-    my @bug_ids;
-    for my $bug_id (@bugs) {
-        push @bug_ids, $bug_id->{id};
-    }
-
-    $res = $client->call(
-        $self->uri,
-        { # callobj
             method => "Bug.comments",
             params => {
-                ids => \@bug_ids,
+                ids       => [ map $_->id, @bugs ],
                 new_since => $iso8601_str,
             },
         },
@@ -360,12 +339,12 @@ sub recent_comments {
     );
 
     unless ($res) {
-        $self->{_error} = $client->status_line;
+        $self->{_error} = 'Bug.comments: ' . $client->status_line;
         return;
     }
 
     if ( $res->is_error ) {
-        $self->{_error} = $res->error_message;
+        $self->{_error} = 'Bug.comments: ' . $res->error_message;
         return;
     }
 
@@ -382,7 +361,8 @@ sub recent_comments {
         } keys %{ $result->{bugs} }
     );
 
-    @comments = ( sort { $b->id <=> $a->id } @comments )[ 0 .. $limit-1 ];
+    my $end_index = @comments < $limit ? $#comments : $limit - 1;
+    @comments = ( sort { $b->id <=> $a->id } @comments )[ 0 .. $end_index ];
 
     return @comments;
 }

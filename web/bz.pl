@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 
+use 5.010;
 use utf8;
 
 use Mojolicious::Lite;
@@ -100,19 +101,137 @@ any '/mybugs' => sub {
     );
 };
 
+any '/search' => sub {
+    my $self = shift;
+
+    my $param = $self->req->params->to_hash;
+
+    # Validation Rule
+    my $rule = [ query => [ 'not_blank' ] ];
+
+    my $vresult = $vc->validate($param, $rule);
+    if ($vresult->is_ok) {
+        my %search_params = _gen_query_params( $param->{query} );
+        my @mybugs = $dashboard->search(%search_params);
+        $self->stash( view => { bug => \@mybugs } );
+    }
+    else {
+        $self->stash( view => { error => 'validation failed' } );
+    }
+
+    my $html = $self->render_partial('search')->to_string;
+    $self->render_text(
+        HTML::FillInForm::Lite->fill(\$html, $param),
+        format => 'html'
+    );
+};
+
 app->start;
+
+sub _gen_query_params {
+    my $query = shift;
+
+    my @status = qw(
+        UNCONFIRMED
+        CONFIRMED
+        IN_PROGRESS
+        RESOLVED
+        VERIFIED
+    );
+
+    my @resolution = qw(
+        FIXED
+        INVALID
+        WONTFIX
+        DUPLICATE
+        WORKSFORME
+    );
+
+    my %params = (
+        alias       => [],
+        assigned_to => [],
+        component   => [],
+        id          => [],
+        priority    => [],
+        product     => [],
+        resolution  => [],
+        status      => [],
+        summary     => [],
+    );
+
+    my @keywords = split(/ /, $query);
+    for my $keyword (@keywords) {
+        if ( $keyword eq 'OPEN' ) {
+            push $params{status}, qw( UNCONFIRMED CONFIRMED IN_PROGRESS );
+        }
+        elsif ( $keyword ~~ \@status ) {
+            push $params{status}, $keyword;
+        }
+        elsif ( $keyword ~~ \@resolution ) {
+            push $params{resolution}, $keyword;
+        }
+        elsif ( $keyword =~ /^P(\d)$/ ) {
+            given ($1) {
+                push $params{priority}, 'HIGHEST' when 1;
+                push $params{priority}, 'HIGH'    when 2;
+                push $params{priority}, 'NORMAL'  when 3;
+                push $params{priority}, 'LOW'     when 4;
+                push $params{priority}, 'LOWEST'  when 5;
+                default { push $params{priority}, '---'; }
+            }
+        }
+        elsif ( $keyword =~ /^P(\d)-(\d)$/ ) {
+            my $first  = $1;
+            my $second = $2;
+            my @priorities = $1 > $2 ? ( $2 .. $1 ) : ( $1 .. $2 );
+            for (@priorities) {
+                push $params{priority}, 'HIGHEST' when 1;
+                push $params{priority}, 'HIGH'    when 2;
+                push $params{priority}, 'NORMAL'  when 3;
+                push $params{priority}, 'LOW'     when 4;
+                push $params{priority}, 'LOWEST'  when 5;
+                default { push $params{priority}, '---'; }
+            }
+        }
+        elsif ( $keyword =~ /^@(.+)$/ ){
+            push $params{assigned_to}, $1;
+        }
+        elsif ( $keyword =~ /^:(.+)$/ ){
+            push $params{component}, $1;
+        }
+        elsif ( $keyword =~ /^;(.+)$/ ){
+            push $params{product}, $1;
+        }
+        elsif ( $keyword =~ /^#(.+)$/ ){
+            push $params{summary}, $1;
+        }
+        elsif ( $keyword =~ /^(\d+)$/ ) {
+            push $params{id}, $keyword;
+        }
+        else {
+            push $params{alias}, $keyword;
+        }
+    }
+
+    my %filtered_params = map { @{ $params{$_} } ? ( $_ => $params{$_} ) : () } keys %params;
+
+    return %filtered_params;
+}
 
 __DATA__
 
-@@ index.html.ep
-% layout 'default';
-% title 'Welcome';
-Welcome to the Mojolicious real-time web framework!
+@@ header.html.ep
 <ul>
   <li> <a href="/recent-comments">recent comments</a> </li>
   <li> <a href="/recent-attachments">recent attachments</a> </li>
   <li> <a href="/mybugs">mybugs</a> </li>
+  <li> <a href="/search">search</a> </li>
 </ul>
+
+@@ index.html.ep
+% layout 'default';
+% title 'Bugzilla Dashboard';
+Welcome to the Bugzilla Dashboard!
 
 @@ recent-comments.html.ep
 % layout 'default';
@@ -135,7 +254,7 @@ Welcome to the Mojolicious real-time web framework!
     </tr>
     % foreach my $comment (@{ $view->{comments} }) {
     <tr>
-      <td><%= $comment->bug_id %></td>
+      <td><%= $comment->bug_id || '' %></td>
       <td><%= $comment->creator %></td>
       <td><%= $comment->time %></td>
       <td title="<%= $comment->text %>"><%= substr($comment->text, 0, 10) %></td>
@@ -182,6 +301,36 @@ Welcome to the Mojolicious real-time web framework!
   </tbody>
 </table>
 
+@@ bugtable.html.ep
+<table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>제품</th>
+      <th>버그 ID</th>
+      <th>우선순위</th>
+      <th>작성자</th>
+      <th>제목</th>
+      <th>변경시간</th>
+      <th>상태</th>
+      <th>해결</th>
+    </tr>
+    % foreach my $bug (@$bugs) {
+    <tr>
+      <td><a href="/search?query=%3B<%= $bug->product %>"><%= $bug->product %></a></td>
+      <td><%= $bug->id %></td>
+      <td><%= $bug->priority %></td>
+      <td><%= $bug->creator %></td>
+      <td><%= $bug->summary %></td>
+      <td><%= $bug->last_change_time %></td>
+      <td><%= $bug->status %></td>
+      <td><%= $bug->resolution %></td>
+    </tr>
+    % }
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+
 
 @@ mybugs.html.ep
 % layout 'default';
@@ -193,29 +342,19 @@ Welcome to the Mojolicious real-time web framework!
   <input type="text" name="user" placeholder="검색할 사용자" />
   <input type="submit" value="새로고침" />
 </form>
-<table class="table table-striped table-bordered table-hover">
-  <thead>
-    <tr>
-      <th>버그 ID</th>
-      <th>작성자</th>
-      <th>제목</th>
-      <th>변경시간</th>
-      <th>상태</th>
-    </tr>
-    % foreach my $bug (@{ $view->{bug} }) {
-    <tr>
-      <td><%= $bug->id %></td>
-      <td><%= $bug->creator %></td>
-      <td><%= $bug->summary %></td>
-      <td><%= $bug->last_change_time %></td>
-      <td><%= $bug->status %></td>
-    </tr>
-    % }
-  </thead>
-  <tbody>
-  </tbody>
-</table>
+%= include 'bugtable', bugs => $view->{bug};
 
+@@ search.html.ep
+% layout 'default';
+% title '빠른 검색';
+% if ($view->{error}) {
+<div class="error"><%= $view->{error} %></div>
+% }
+<form method="post" enctype="application/x-www-form-urlencoded">
+  <input type="text" name="query" placeholder="검색할 키워드" />
+  <input type="submit" value="새로고침" />
+</form>
+%= include 'bugtable', bugs => $view->{bug};
 
 @@ layouts/default.html.ep
 <!DOCTYPE html>
@@ -226,5 +365,8 @@ Welcome to the Mojolicious real-time web framework!
     <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js"></script>
     <title><%= title %></title>
   </head>
-  <body><%= content %></body>
+  <body>
+    %= include 'header';
+    <%= content %>
+  </body>
 </html>

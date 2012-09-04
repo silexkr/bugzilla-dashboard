@@ -153,6 +153,63 @@ sub search {
     return @bugs;
 }
 
+sub bugs {
+    my ( $self, @ids ) = @_;
+
+    return unless $self->_jsonrpc;
+    return unless $self->_cookie;
+
+    my $client = $self->_jsonrpc;
+    my $res = $client->call(
+        $self->uri,
+        { # callobj
+            method => "Bug.get",
+            params => {
+                include_fields => [qw(
+                    priority
+                    creator
+                    blocks
+                    last_change_time
+                    assigned_to
+                    creation_time
+                    id
+                    depends_on
+                    resolution
+                    classification
+                    alias
+                    status
+                    summary
+                    deadline
+                    component
+                    product
+                    is_open
+                )],
+                permissive => 1,
+                ids        => \@ids,
+            },
+        },
+        $self->_cookie,
+    );
+
+    unless ($res) {
+        $self->{_error} = 'Bug.get: ' . $client->status_line;
+        return;
+    }
+
+    if ( $res->is_error ) {
+        $self->{_error} = 'Bug.get: ' . $res->error_message;
+        return;
+    }
+
+    my $result = $res->result;
+    return unless $result;
+    return unless $result->{bugs};
+
+    my @bugs = Bugzilla::Dashboard::Bug->new( @{ $result->{bugs} } );
+
+    return @bugs;
+}
+
 sub mybugs {
     my ( $self, $user ) = @_;
 

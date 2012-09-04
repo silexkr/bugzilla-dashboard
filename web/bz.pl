@@ -27,7 +27,7 @@ any '/recent-comments' => sub {
 
     my $param = $self->req->params->to_hash;
     $param->{date}  ||= DateTime->now->add(days => -1)->ymd;
-    $param->{limit} ||= 10;
+    $param->{limit} ||= 50;
 
     # Validation Rule
     my $rule = [
@@ -233,6 +233,30 @@ __DATA__
 % title 'Bugzilla Dashboard';
 Welcome to the Bugzilla Dashboard!
 
+@@ commenttable.html.ep
+<table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>버그 ID</th>
+      <th>커멘트 ID</th>
+      <th>작성자</th>
+      <th>변경시간</th>
+      <th>댓글요약</th>
+    </tr>
+    % foreach my $comment (@{ $view->{comments} }) {
+    <tr>
+      <td><%= $comment->bug_id %></td>
+      <td><%= $comment->id %></td>
+      <td><%= $comment->creator %></td>
+      <td><%= $comment->time %></td>
+      <td title="<%= $comment->text %>"><%= length($comment->text) > 100 ?  substr($comment->text, 0, 100) . '...' : $comment->text %></td>
+    </tr>
+    % }
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+
 @@ recent-comments.html.ep
 % layout 'default';
 % title '최근 변경 이력의 제공';
@@ -244,27 +268,7 @@ Welcome to the Bugzilla Dashboard!
   <input type="text" name="limit" placeholder="갯수" />
   <input type="submit" value="새로고침" />
 </form>
-<table class="table table-striped table-bordered table-hover">
-  <thead>
-    <tr>
-      <th>버그 ID</th>
-      <th>작성자</th>
-      <th>변경시간</th>
-      <th>댓글요약</th>
-    </tr>
-    % foreach my $comment (@{ $view->{comments} }) {
-    <tr>
-      <td><%= $comment->bug_id || '' %></td>
-      <td><%= $comment->creator %></td>
-      <td><%= $comment->time %></td>
-      <td title="<%= $comment->text %>"><%= substr($comment->text, 0, 10) %></td>
-    </tr>
-    % }
-  </thead>
-  <tbody>
-  </tbody>
-</table>
-
+%= include 'commenttable', comments => $view->{comments};
 
 @@ recent-attachments.html.ep
 % layout 'default';

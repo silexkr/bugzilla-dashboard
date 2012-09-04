@@ -424,41 +424,16 @@ sub recent_comments {
     );
     return unless @bugs;
 
-    my $client = $self->_jsonrpc;
-    my $res = $client->call(
-        $self->uri,
-        { # callobj
-            method => "Bug.comments",
-            params => {
-                ids       => [ map $_->id, @bugs ],
-                new_since => $iso8601_str,
-            },
-        },
-        $self->_cookie,
+    my %comments = $self->comments(
+        ids       => [ map $_->id, @bugs ],
+        new_since => $iso8601_str,
     );
+    return unless %comments;
 
-    unless ($res) {
-        $self->{_error} = 'Bug.comments: ' . $client->status_line;
-        return;
+    my @comments;
+    for my $bugid  ( keys %comments ) {
+        push @comments, @{ $comments{$bugid} };
     }
-
-    if ( $res->is_error ) {
-        $self->{_error} = 'Bug.comments: ' . $res->error_message;
-        return;
-    }
-
-    my $result = $res->result;
-    return unless $result;
-    return unless $result->{bugs};
-
-    my @comments = Bugzilla::Dashboard::Comment->new(
-        map {
-            my $bugid = $_;
-            my $cinfo = $result->{bugs}{$bugid}{comments};
-
-            @$cinfo ? @$cinfo : ();
-        } keys %{ $result->{bugs} }
-    );
 
     my $end_index = @comments < $limit ? $#comments : $limit - 1;
     @comments = ( sort { $b->id <=> $a->id } @comments )[ 0 .. $end_index ];

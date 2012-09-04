@@ -12,13 +12,15 @@ use Validator::Custom;
 
 use Bugzilla::Dashboard;
 
-my $vc = Validator::Custom->new;
+my $config = plugin 'Config';
 
 my $dashboard = Bugzilla::Dashboard->new(
-    uri      => $ENV{BZ_DASHBOARD_URI},
-    user     => $ENV{BZ_DASHBOARD_USER},
-    password => $ENV{BZ_DASHBOARD_PASSWORD},
+    uri      => $config->{connect}{uri}      || q{},
+    user     => $config->{connect}{user}     || q{},
+    password => $config->{connect}{password} || q{},
 ) or die "cannot connect to bugzilla dashboard\n";
+
+my $vc = Validator::Custom->new;
 
 get '/' => 'index';
 
@@ -27,7 +29,7 @@ any '/recent-comments' => sub {
 
     my $param = $self->req->params->to_hash;
     $param->{date}  ||= DateTime->now->add(days => -1)->ymd;
-    $param->{limit} ||= 50;
+    $param->{limit} ||= $config->{recent_comments_limit};
 
     # Validation Rule
     my $rule = [
@@ -57,7 +59,7 @@ any '/recent-attachments' => sub {
     my $self = shift;
 
     my $param = $self->req->params->to_hash;
-    $param->{limit} ||= 10;
+    $param->{limit} ||= $config->{recent_attachments_limit};
 
     # Validation Rule
     my $rule = [ limit => [ 'int' ] ];
@@ -237,7 +239,6 @@ Welcome to the Bugzilla Dashboard!
 <table class="table table-striped table-bordered table-hover">
   <thead>
     <tr>
-      <th>버그 ID</th>
       <th>커멘트 ID</th>
       <th>작성자</th>
       <th>변경시간</th>
@@ -245,11 +246,16 @@ Welcome to the Bugzilla Dashboard!
     </tr>
     % foreach my $comment (@{ $view->{comments} }) {
     <tr>
-      <td><%= $comment->bug_id %></td>
-      <td><%= $comment->id %></td>
+      <td><%= $comment->bug_id %> (<%= $comment->id %>)</td>
       <td><%= $comment->creator %></td>
       <td><%= $comment->time %></td>
-      <td title="<%= $comment->text %>"><%= length($comment->text) > 100 ?  substr($comment->text, 0, 100) . '...' : $comment->text %></td>
+      <td>
+        <%=
+          length($comment->text) > $config->{comments_string_length}
+            ? substr($comment->text, 0, $config->{comments_string_length}) .  '...'
+            : $comment->text
+        %>
+      </td>
     </tr>
     % }
   </thead>
@@ -334,7 +340,6 @@ Welcome to the Bugzilla Dashboard!
   <tbody>
   </tbody>
 </table>
-
 
 @@ mybugs.html.ep
 % layout 'default';

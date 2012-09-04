@@ -153,6 +153,63 @@ sub search {
     return @bugs;
 }
 
+sub bugs {
+    my ( $self, @ids ) = @_;
+
+    return unless $self->_jsonrpc;
+    return unless $self->_cookie;
+
+    my $client = $self->_jsonrpc;
+    my $res = $client->call(
+        $self->uri,
+        { # callobj
+            method => "Bug.get",
+            params => {
+                include_fields => [qw(
+                    priority
+                    creator
+                    blocks
+                    last_change_time
+                    assigned_to
+                    creation_time
+                    id
+                    depends_on
+                    resolution
+                    classification
+                    alias
+                    status
+                    summary
+                    deadline
+                    component
+                    product
+                    is_open
+                )],
+                permissive => 1,
+                ids        => \@ids,
+            },
+        },
+        $self->_cookie,
+    );
+
+    unless ($res) {
+        $self->{_error} = 'Bug.get: ' . $client->status_line;
+        return;
+    }
+
+    if ( $res->is_error ) {
+        $self->{_error} = 'Bug.get: ' . $res->error_message;
+        return;
+    }
+
+    my $result = $res->result;
+    return unless $result;
+    return unless $result->{bugs};
+
+    my @bugs = Bugzilla::Dashboard::Bug->new( @{ $result->{bugs} } );
+
+    return @bugs;
+}
+
 sub mybugs {
     my ( $self, $user ) = @_;
 
@@ -285,19 +342,11 @@ sub recent_attachments {
     return @attachments;
 }
 
-sub recent_comments {
-    my ( $self, $dt, $limit ) = @_;
+sub comments {
+    my ( $self, %params ) = @_;
 
-    return unless $dt;
-    return unless $limit;
-
-    my $iso8601_str = $dt->strftime('%Y-%m-%dT%H:%M:%S%z');
-
-    my @bugs = $self->search(
-        last_change_time => $iso8601_str,
-        include_fields   => [qw( id )],
-    );
-    return unless @bugs;
+    return unless $self->_jsonrpc;
+    return unless $self->_cookie;
 
     my $client = $self->_jsonrpc;
     my $res = $client->call(
@@ -305,8 +354,18 @@ sub recent_comments {
         { # callobj
             method => "Bug.comments",
             params => {
-                ids       => [ map $_->id, @bugs ],
-                new_since => $iso8601_str,
+                include_fields => [qw(
+                    id
+                    bug_id
+                    attachment_id
+                    count
+                    text
+                    creator
+                    time
+                    creation_time
+                    is_private
+                )],
+                %params,
             },
         },
         $self->_cookie,
@@ -324,16 +383,57 @@ sub recent_comments {
 
     my $result = $res->result;
     return unless $result;
-    return unless $result->{bugs};
+    return unless $result->{comments} || $result->{bugs};
 
-    my @comments = Bugzilla::Dashboard::Comment->new(
-        map {
-            my $bugid = $_;
+    if ( %{ $result->{comments} } ) {
+        my @comments = Bugzilla::Dashboard::Comment->new(
+            map {
+                my $cinfo = $result->{comments}{$_};
+                $cinfo ? $cinfo : ();
+            } keys %{ $result->{comments} }
+        );
+
+        return @comments;
+    }
+    elsif ( %{ $result->{bugs} } ) {
+        my %comments;
+        for my $bugid ( keys %{ $result->{bugs} } ) {
             my $cinfo = $result->{bugs}{$bugid}{comments};
+            if (@$cinfo) {
+                $comments{$bugid} = [ Bugzilla::Dashboard::Comment->new(@$cinfo) ];
+            }
+        }
 
-            @$cinfo ? @$cinfo : ();
-        } keys %{ $result->{bugs} }
+        return %comments;
+    }
+
+    return;
+}
+
+sub recent_comments {
+    my ( $self, $dt, $limit ) = @_;
+
+    return unless $dt;
+    return unless $limit;
+
+    my $iso8601_str = $dt->strftime('%Y-%m-%dT%H:%M:%S%z');
+
+    my @bugs = $self->search(
+        last_change_time => $iso8601_str,
+        include_fields   => [qw( id )],
     );
+    return unless @bugs;
+
+    my %comments = $self->comments(
+        ids       => [ map $_->id, @bugs ],
+        new_since => $iso8601_str,
+    );
+    return unless %comments;
+
+    my @comments;
+    for my $bugid  ( keys %comments ) {
+        push @comments, @{ $comments{$bugid} };
+    }
 
     my $end_index = @comments < $limit ? $#comments : $limit - 1;
     @comments = ( sort { $b->id <=> $a->id } @comments )[ 0 .. $end_index ];

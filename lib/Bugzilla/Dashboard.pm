@@ -342,6 +342,74 @@ sub recent_attachments {
     return @attachments;
 }
 
+sub comments {
+    my ( $self, %params ) = @_;
+
+    return unless $self->_jsonrpc;
+    return unless $self->_cookie;
+
+    my $client = $self->_jsonrpc;
+    my $res = $client->call(
+        $self->uri,
+        { # callobj
+            method => "Bug.comments",
+            params => {
+                include_fields => [qw(
+                    id
+                    bug_id
+                    attachment_id
+                    count
+                    text
+                    creator
+                    time
+                    creation_time
+                    is_private
+                )],
+                %params,
+            },
+        },
+        $self->_cookie,
+    );
+
+    unless ($res) {
+        $self->{_error} = 'Bug.comments: ' . $client->status_line;
+        return;
+    }
+
+    if ( $res->is_error ) {
+        $self->{_error} = 'Bug.comments: ' . $res->error_message;
+        return;
+    }
+
+    my $result = $res->result;
+    return unless $result;
+    return unless $result->{comments} || $result->{bugs};
+
+    if ( %{ $result->{comments} } ) {
+        my @comments = Bugzilla::Dashboard::Comment->new(
+            map {
+                my $cinfo = $result->{comments}{$_};
+                $cinfo ? $cinfo : ();
+            } keys %{ $result->{comments} }
+        );
+
+        return @comments;
+    }
+    elsif ( %{ $result->{bugs} } ) {
+        my %comments;
+        for my $bugid ( keys %{ $result->{bugs} } ) {
+            my $cinfo = $result->{bugs}{$bugid}{comments};
+            if (@$cinfo) {
+                $comments{$bugid} = [ Bugzilla::Dashboard::Comment->new(@$cinfo) ];
+            }
+        }
+
+        return %comments;
+    }
+
+    return;
+}
+
 sub recent_comments {
     my ( $self, $dt, $limit ) = @_;
 

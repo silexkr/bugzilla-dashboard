@@ -4,7 +4,7 @@ use DateTime;
 BEGIN { use_ok('Bugzilla::Dashboard') }
 
 my $uri      = $ENV{BZ_DASHBOARD_URI}      || 'http://bugs.silex.kr/jsonrpc.cgi';
-my $username = $ENV{BZ_DASHBOARD_USERNAME} || '';
+my $username = $ENV{BZ_DASHBOARD_USER} || '';
 my $password = $ENV{BZ_DASHBOARD_PASSWORD} || '';
 
 my $d = Bugzilla::Dashboard->new(

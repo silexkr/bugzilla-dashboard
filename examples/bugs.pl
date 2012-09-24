@@ -12,7 +12,7 @@ use Bugzilla::Dashboard;
 binmode STDOUT, ':utf8';
 
 my ( $opt, $usage ) = describe_options(
-    "%c %o ... ",
+    "%c %o <bug id> [ <bug id> ... ] ",
     [ 'user|u=s',     "username" ],
     [ 'password|p=s', "password" ],
     [ 'uri=s',        "the URI to connect to", ],
@@ -26,10 +26,13 @@ $connect_info{user}     = $opt->user     if $opt->user;
 $connect_info{password} = $opt->password if $opt->password;
 $connect_info{uri}      = $opt->uir      if $opt->uri;
 
+my @ids = @ARGV;
+print($usage->text), exit unless @ids;
+
 my $dashboard = Bugzilla::Dashboard->new(%connect_info)
     or die "cannot connect to json-rpc server\n";
 
-my @bugs = $dashboard->mybugs( $connect_info{user} );
+my @bugs = $dashboard->bugs(@ids);
 for my $bug (@bugs) {
     say "ID: ", $bug->id;
     say "    SUMMARY: ", $bug->summary;

@@ -14,11 +14,8 @@ use Bugzilla::Dashboard;
 
 my $config = plugin 'Config';
 
-my $dashboard = Bugzilla::Dashboard->new(
-    uri      => $config->{connect}{uri}      || q{},
-    user     => $config->{connect}{user}     || q{},
-    password => $config->{connect}{password} || q{},
-) or die "cannot connect to bugzilla dashboard\n";
+my $dashboard = Bugzilla::Dashboard->new( %{ $config->{connect} } )
+    or die "cannot connect to bugzilla dashboard\n";
 
 my $vc = Validator::Custom->new;
 

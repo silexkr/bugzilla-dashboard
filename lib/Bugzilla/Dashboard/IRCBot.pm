@@ -40,11 +40,8 @@ sub bugzilla_uri {
 sub _build_comment_length { 200 }
 
 sub _build_dashboard {
-    my $bd = Bugzilla::Dashboard->new(
-        uri      => $ENV{BUGZILLA_DASHBOARD_URI}      || q{},
-        user     => $ENV{BUGZILLA_DASHBOARD_USER}     || q{},
-        password => $ENV{BUGZILLA_DASHBOARD_PASSWORD} || q{},
-    ) or die "cannot connect to bugzilla\n";
+    my $bd = Bugzilla::Dashboard->new
+        or die "cannot connect to bugzilla\n";
 
     return $bd;
 }

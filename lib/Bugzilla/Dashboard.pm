@@ -18,6 +18,9 @@ sub new {
     my %params = @_;
 
     my $self = bless {
+        uri      => $ENV{BUGZILLA_DASHBOARD_URI},
+        user     => $ENV{BUGZILLA_DASHBOARD_USER},
+        password => $ENV{BUGZILLA_DASHBOARD_PASSWORD},
         %params,
         _cookie  => HTTP::Cookies->new( {} ),
         _error   => q{},

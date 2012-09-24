@@ -14,24 +14,21 @@ binmode STDOUT, ':utf8';
 
 my ( $opt, $usage ) = describe_options(
     "%c %o ... ",
-    [ 'user|u=s',     "username" ],
-    [ 'password|p=s', "password" ],
-    [
-        'uri=s',     "the URI to connect to",
-        { default => "http://bugs.silex.kr/jsonrpc.cgi" },
-    ],
+    [ 'user|u=s',     'username' ],
+    [ 'password|p=s', 'password' ],
+    [ 'uri=s',        'the URI to connect to', ],
     [],
-    [ 'help|h',    "print usage" ],
+    [ 'help|h', 'print usage' ],
 );
+print($usage->text), exit if $opt->help;
 
-print($usage->text), exit unless $opt->user;
-print($usage->text), exit unless $opt->password;
+my %connect_info;
+$connect_info{user}     = $opt->user     if $opt->user;
+$connect_info{password} = $opt->password if $opt->password;
+$connect_info{uri}      = $opt->uir      if $opt->uri;
 
-my $dashboard = Bugzilla::Dashboard->new(
-    uri      => $opt->uri,
-    user     => $opt->user,
-    password => $opt->password,
-) or die "cannot connect to json-rpc server\n";
+my $dashboard = Bugzilla::Dashboard->new(%connect_info)
+    or die "cannot connect to json-rpc server\n";
 
 my $history = $dashboard->history(185);
 

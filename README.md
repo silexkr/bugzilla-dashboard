@@ -1,10 +1,7 @@
-bugzilla-dashboard
-==================
+Bugzilla::Dashboard
+====================
 
-Bugzilla 의 DashBoard 구현
-
-Bugzilla 에 다음의 기능을 제공하는 DashBoard 구현을 목표로
-다음의 이슈들을 생성하였습니다.
+버그질라 대시보드는 다음의 기능을 제공하는 것을 목표로 합니다.
 
 - 최근 변경 이력의 제공 ( bug 286 )
 - 최근 변경 첨부파일 이력의 제공 ( bug 287 )
@@ -12,22 +9,26 @@ Bugzilla 에 다음의 기능을 제공하는 DashBoard 구현을 목표로
 - 탐색창 추가 ( bug 289 )
 - 빠른 이슈 생성 창 추가 ( bug 290 )
 - 각 사용자별의 사용 통계표 제공 ( bug 291 )
-- IRC Notification (optional) ( bug 292 )
+- IRC Notification ( bug 292 )
 
-### Environment Variables ###
 
-- `BZ_DASHBOARD_USER`     - **required**
-- `BZ_DASHBOARD_PASSOWRD` - **required**
-- `BZ_DASHBOARD_URI`      - optional. 'http://bugs.silex.kr/jsonrpc.cgi' as default
+환경 변수
+----------
 
-        $ export BZ_DASHBOARD_USER="your@email.com"
-        $ export BZ_DASHBOARD_PASSWORD="s3cr3t passw0rd"
-        $ export BZ_DASHBOARD_URI="http://bugs.silex.kr/jsonrpc.cgi"
+다음 세 개의 환경 변수를 사용합니다.
 
-### RUN ###
+- `BUGZILLA_DASHBOARD_USER`: 버그질라 로그인 아이디
+- `BUGZILLA_DASHBOARD_PASSOWRD`: 버그질라 로그인 비밀번호
+- `BUGZILLA_DASHBOARD_URI`: 버그질라 JSON-RPC 주소
+
+
+실행
+-----
 
     $ PERL5LIB=lib morbo bugzilla-dashboard-web.pl
 
-### TEST ###
+
+테스트
+-------
 
     $ prove -l

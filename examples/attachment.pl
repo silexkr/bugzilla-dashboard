@@ -12,28 +12,27 @@ use Bugzilla::Dashboard;
 binmode STDOUT, ':utf8';
 
 my ( $opt, $usage ) = describe_options(
-    "%c %o ... ",
-    [ 'user|u=s',     "username" ],
-    [ 'password|p=s', "password" ],
-    [
-        'uri=s',     "the URI to connect to",
-        { default => "http://bugs.silex.kr/jsonrpc.cgi" },
-    ],
+    "%c %o <count>",
+    [ 'user|u=s',     'username' ],
+    [ 'password|p=s', 'password' ],
+    [ 'uri=s',        'the URI to connect to', ],
     [],
-    [ 'help|h',    "print usage" ],
+    [ 'help|h', 'print usage' ],
 );
+print($usage->text), exit if $opt->help;
 
-print($usage->text), exit unless $opt->user;
-print($usage->text), exit unless $opt->password;
+my $count = shift || 20;
 
-my $dashboard = Bugzilla::Dashboard->new(
-    uri      => $opt->uri,
-    user     => $opt->user,
-    password => $opt->password,
-) or die "cannot connect to json-rpc server\n";
+my %connect_info;
+$connect_info{user}     = $opt->user     if $opt->user;
+$connect_info{password} = $opt->password if $opt->password;
+$connect_info{uri}      = $opt->uir      if $opt->uri;
+
+my $dashboard = Bugzilla::Dashboard->new(%connect_info)
+    or die "cannot connect to json-rpc server\n";
 
 # fetch recent 20 attachments
-my @attachments = $dashboard->recent_attachments(20);
+my @attachments = $dashboard->recent_attachments($count);
 for my $attachment (@attachments) {
     say "ID: ",                $attachment->id;
     say "    BUGID: ",         $attachment->bug_id;

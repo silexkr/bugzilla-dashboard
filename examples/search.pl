@@ -6,35 +6,35 @@ use strict;
 use warnings;
 
 use Getopt::Long::Descriptive;
+use Encode qw( decode_utf8 );
 
 use Bugzilla::Dashboard;
 
 binmode STDOUT, ':utf8';
 
 my ( $opt, $usage ) = describe_options(
-    "%c %o ... ",
+    "%c %o <query>",
     [ 'user|u=s',     "username" ],
     [ 'password|p=s', "password" ],
-    [ 'keyword|k=s',  "search keyword" ],
-    [
-        'uri=s',
-        "the URI to connect to",
-        { default => "http://bugs.silex.kr/jsonrpc.cgi" },
-    ],
+    [ 'uri=s',        "the URI to connect to", ],
     [],
     [ 'help|h', "print usage" ],
 );
+print($usage->text), exit if $opt->help;
 
-print($usage->text), exit unless $opt->user;
-print($usage->text), exit unless $opt->password;
+my %connect_info;
+$connect_info{user}     = $opt->user     if $opt->user;
+$connect_info{password} = $opt->password if $opt->password;
+$connect_info{uri}      = $opt->uir      if $opt->uri;
 
-my $dashboard = Bugzilla::Dashboard->new(
-    uri      => $opt->uri,
-    user     => $opt->user,
-    password => $opt->password,
-) or die "cannot connect to json-rpc server\n";
+my $query = shift;
+print($usage->text), exit unless $query;
 
-my @bugs = $dashboard->quick_search( $opt->{keyword} );
+my $dashboard = Bugzilla::Dashboard->new(%connect_info)
+    or die "cannot connect to json-rpc server\n";
+
+my %search_params = $dashboard->generate_query_params( decode_utf8($query) );
+my @bugs = $dashboard->search(%search_params);
 for my $bug (@bugs) {
     say "ID: ", $bug->id;
     say "    SUMMARY: ", $bug->summary;

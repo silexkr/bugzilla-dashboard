@@ -7,6 +7,7 @@ use warnings;
 use HTTP::Cookies;
 use JSON::RPC::Legacy::Client;
 use List::Util qw( max );
+use Try::Tiny;
 
 use Bugzilla::Dashboard::Attachment;
 use Bugzilla::Dashboard::Bug;
@@ -69,16 +70,18 @@ sub connect {
     return unless $self->_cookie;
 
     my $client = $self->_jsonrpc;
-    my $res = $client->call(
-        $self->uri,
-        { # callobj
-            method => 'User.login',
-            params => {
-                login    => $self->user,
-                password => $self->password,
+    my $res = try {
+        $client->call(
+            $self->uri,
+            { # callobj
+                method => 'User.login',
+                params => {
+                    login    => $self->user,
+                    password => $self->password,
+                }
             }
-        }
-    );
+        );
+    };
 
     unless ($res) {
         $self->{_error} = $client->status_line;
@@ -107,35 +110,37 @@ sub search {
     return unless $self->_cookie;
 
     my $client = $self->_jsonrpc;
-    my $res = $client->call(
-        $self->uri,
-        { # callobj
-            method => "Bug.search",
-            params => {
-                include_fields => [qw(
-                    priority
-                    creator
-                    blocks
-                    last_change_time
-                    assigned_to
-                    creation_time
-                    id
-                    depends_on
-                    resolution
-                    classification
-                    alias
-                    status
-                    summary
-                    deadline
-                    component
-                    product
-                    is_open
-                )],
-                %params,
+    my $res = try {
+        $client->call(
+            $self->uri,
+            { # callobj
+                method => "Bug.search",
+                params => {
+                    include_fields => [qw(
+                        priority
+                        creator
+                        blocks
+                        last_change_time
+                        assigned_to
+                        creation_time
+                        id
+                        depends_on
+                        resolution
+                        classification
+                        alias
+                        status
+                        summary
+                        deadline
+                        component
+                        product
+                        is_open
+                    )],
+                    %params,
+                },
             },
-        },
-        $self->_cookie,
-    );
+            $self->_cookie,
+        );
+    };
 
     unless ($res) {
         $self->{_error} = 'Bug.search: ' . $client->status_line;
@@ -163,36 +168,38 @@ sub bugs {
     return unless $self->_cookie;
 
     my $client = $self->_jsonrpc;
-    my $res = $client->call(
-        $self->uri,
-        { # callobj
-            method => "Bug.get",
-            params => {
-                include_fields => [qw(
-                    priority
-                    creator
-                    blocks
-                    last_change_time
-                    assigned_to
-                    creation_time
-                    id
-                    depends_on
-                    resolution
-                    classification
-                    alias
-                    status
-                    summary
-                    deadline
-                    component
-                    product
-                    is_open
-                )],
-                permissive => 1,
-                ids        => \@ids,
+    my $res = try {
+        $client->call(
+            $self->uri,
+            { # callobj
+                method => "Bug.get",
+                params => {
+                    include_fields => [qw(
+                        priority
+                        creator
+                        blocks
+                        last_change_time
+                        assigned_to
+                        creation_time
+                        id
+                        depends_on
+                        resolution
+                        classification
+                        alias
+                        status
+                        summary
+                        deadline
+                        component
+                        product
+                        is_open
+                    )],
+                    permissive => 1,
+                    ids        => \@ids,
+                },
             },
-        },
-        $self->_cookie,
-    );
+            $self->_cookie,
+        );
+    };
 
     unless ($res) {
         $self->{_error} = 'Bug.get: ' . $client->status_line;
@@ -231,16 +238,18 @@ sub history {
     return unless @ids;
 
     my $client = $self->_jsonrpc;
-    my $res = $client->call(
-        $self->uri,
-        { # callobj
-            method => "Bug.history",
-            params => {
-                ids => \@ids,
+    my $res = try {
+        $client->call(
+            $self->uri,
+            { # callobj
+                method => "Bug.history",
+                params => {
+                    ids => \@ids,
+                },
             },
-        },
-        $self->_cookie,
-    );
+            $self->_cookie,
+        );
+    };
 
     unless ($res) {
         $self->{_error} = $client->status_line;
@@ -263,30 +272,32 @@ sub attachments {
     return unless @ids;
 
     my $client = $self->_jsonrpc;
-    my $res = $client->call(
-        $self->uri,
-        { # callobj
-            method => "Bug.attachments",
-            params => {
-                attachment_ids => \@ids,
-                include_fields => [qw(
-                    bug_id
-                    content_type
-                    creation_time
-                    creator
-                    file_name
-                    id
-                    is_obsolete
-                    is_patch
-                    is_private
-                    last_change_time
-                    size
-                    summary
-                )],
+    my $res = try {
+        $client->call(
+            $self->uri,
+            { # callobj
+                method => "Bug.attachments",
+                params => {
+                    attachment_ids => \@ids,
+                    include_fields => [qw(
+                        bug_id
+                        content_type
+                        creation_time
+                        creator
+                        file_name
+                        id
+                        is_obsolete
+                        is_patch
+                        is_private
+                        last_change_time
+                        size
+                        summary
+                    )],
+                },
             },
-        },
-        $self->_cookie,
-    );
+            $self->_cookie,
+        );
+    };
 
     unless ($res) {
         $self->{_error} = $client->status_line;
@@ -352,27 +363,29 @@ sub comments {
     return unless $self->_cookie;
 
     my $client = $self->_jsonrpc;
-    my $res = $client->call(
-        $self->uri,
-        { # callobj
-            method => "Bug.comments",
-            params => {
-                include_fields => [qw(
-                    id
-                    bug_id
-                    attachment_id
-                    count
-                    text
-                    creator
-                    time
-                    creation_time
-                    is_private
-                )],
-                %params,
+    my $res = try {
+        $client->call(
+            $self->uri,
+            { # callobj
+                method => "Bug.comments",
+                params => {
+                    include_fields => [qw(
+                        id
+                        bug_id
+                        attachment_id
+                        count
+                        text
+                        creator
+                        time
+                        creation_time
+                        is_private
+                    )],
+                    %params,
+                },
             },
-        },
-        $self->_cookie,
-    );
+            $self->_cookie,
+        );
+    };
 
     unless ($res) {
         $self->{_error} = 'Bug.comments: ' . $client->status_line;

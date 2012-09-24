@@ -196,22 +196,22 @@ sub generate_query_params {
     my @keywords = split(/ /, $query);
     for my $keyword (@keywords) {
         if ( $keyword eq 'OPEN' ) {
-            push $params{status}, qw( UNCONFIRMED CONFIRMED IN_PROGRESS );
+            push @{ $params{status} }, qw( UNCONFIRMED CONFIRMED IN_PROGRESS );
         }
         elsif ( $keyword ~~ \@status ) {
-            push $params{status}, $keyword;
+            push @{ $params{status} }, $keyword;
         }
         elsif ( $keyword ~~ \@resolution ) {
-            push $params{resolution}, $keyword;
+            push @{ $params{resolution} }, $keyword;
         }
         elsif ( $keyword =~ /^P(\d)$/ ) {
             given ($1) {
-                push $params{priority}, 'HIGHEST' when 1;
-                push $params{priority}, 'HIGH'    when 2;
-                push $params{priority}, 'NORMAL'  when 3;
-                push $params{priority}, 'LOW'     when 4;
-                push $params{priority}, 'LOWEST'  when 5;
-                default { push $params{priority}, '---'; }
+                push @{ $params{priority} }, 'HIGHEST' when 1;
+                push @{ $params{priority} }, 'HIGH'    when 2;
+                push @{ $params{priority} }, 'NORMAL'  when 3;
+                push @{ $params{priority} }, 'LOW'     when 4;
+                push @{ $params{priority} }, 'LOWEST'  when 5;
+                default { push @{ $params{priority} }, '---'; }
             }
         }
         elsif ( $keyword =~ /^P(\d)-(\d)$/ ) {
@@ -219,31 +219,31 @@ sub generate_query_params {
             my $second = $2;
             my @priorities = $1 > $2 ? ( $2 .. $1 ) : ( $1 .. $2 );
             for (@priorities) {
-                push $params{priority}, 'HIGHEST' when 1;
-                push $params{priority}, 'HIGH'    when 2;
-                push $params{priority}, 'NORMAL'  when 3;
-                push $params{priority}, 'LOW'     when 4;
-                push $params{priority}, 'LOWEST'  when 5;
-                default { push $params{priority}, '---'; }
+                push @{ $params{priority} }, 'HIGHEST' when 1;
+                push @{ $params{priority} }, 'HIGH'    when 2;
+                push @{ $params{priority} }, 'NORMAL'  when 3;
+                push @{ $params{priority} }, 'LOW'     when 4;
+                push @{ $params{priority} }, 'LOWEST'  when 5;
+                default { push @{ $params{priority} }, '---'; }
             }
         }
         elsif ( $keyword =~ /^@(.+)$/ ){
-            push $params{assigned_to}, $1;
+            push @{ $params{assigned_to} }, $1;
         }
         elsif ( $keyword =~ /^:(.+)$/ ){
-            push $params{component}, $1;
+            push @{ $params{component} }, $1;
         }
         elsif ( $keyword =~ /^;(.+)$/ ){
-            push $params{product}, $1;
+            push @{ $params{product} }, $1;
         }
         elsif ( $keyword =~ /^#(.+)$/ ){
-            push $params{summary}, $1;
+            push @{ $params{summary} }, $1;
         }
         elsif ( $keyword =~ /^(\d+)$/ ) {
-            push $params{id}, $keyword;
+            push @{ $params{id} }, $keyword;
         }
         else {
-            push $params{alias}, $keyword;
+            push @{ $params{alias} }, $keyword;
         }
     }
 

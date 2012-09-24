@@ -110,7 +110,7 @@ any '/search' => sub {
 
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
-        my %search_params = _gen_query_params( $param->{query} );
+        my %search_params = $dashboard->generate_query_params( $param->{query} );
         my @mybugs = $dashboard->search(%search_params);
         $self->stash( view => { bug => \@mybugs } );
     }
@@ -126,96 +126,6 @@ any '/search' => sub {
 };
 
 app->start;
-
-sub _gen_query_params {
-    my $query = shift;
-
-    my @status = qw(
-        UNCONFIRMED
-        CONFIRMED
-        IN_PROGRESS
-        RESOLVED
-        VERIFIED
-    );
-
-    my @resolution = qw(
-        FIXED
-        INVALID
-        WONTFIX
-        DUPLICATE
-        WORKSFORME
-    );
-
-    my %params = (
-        alias       => [],
-        assigned_to => [],
-        component   => [],
-        id          => [],
-        priority    => [],
-        product     => [],
-        resolution  => [],
-        status      => [],
-        summary     => [],
-    );
-
-    my @keywords = split(/ /, $query);
-    for my $keyword (@keywords) {
-        if ( $keyword eq 'OPEN' ) {
-            push $params{status}, qw( UNCONFIRMED CONFIRMED IN_PROGRESS );
-        }
-        elsif ( $keyword ~~ \@status ) {
-            push $params{status}, $keyword;
-        }
-        elsif ( $keyword ~~ \@resolution ) {
-            push $params{resolution}, $keyword;
-        }
-        elsif ( $keyword =~ /^P(\d)$/ ) {
-            given ($1) {
-                push $params{priority}, 'HIGHEST' when 1;
-                push $params{priority}, 'HIGH'    when 2;
-                push $params{priority}, 'NORMAL'  when 3;
-                push $params{priority}, 'LOW'     when 4;
-                push $params{priority}, 'LOWEST'  when 5;
-                default { push $params{priority}, '---'; }
-            }
-        }
-        elsif ( $keyword =~ /^P(\d)-(\d)$/ ) {
-            my $first  = $1;
-            my $second = $2;
-            my @priorities = $1 > $2 ? ( $2 .. $1 ) : ( $1 .. $2 );
-            for (@priorities) {
-                push $params{priority}, 'HIGHEST' when 1;
-                push $params{priority}, 'HIGH'    when 2;
-                push $params{priority}, 'NORMAL'  when 3;
-                push $params{priority}, 'LOW'     when 4;
-                push $params{priority}, 'LOWEST'  when 5;
-                default { push $params{priority}, '---'; }
-            }
-        }
-        elsif ( $keyword =~ /^@(.+)$/ ){
-            push $params{assigned_to}, $1;
-        }
-        elsif ( $keyword =~ /^:(.+)$/ ){
-            push $params{component}, $1;
-        }
-        elsif ( $keyword =~ /^;(.+)$/ ){
-            push $params{product}, $1;
-        }
-        elsif ( $keyword =~ /^#(.+)$/ ){
-            push $params{summary}, $1;
-        }
-        elsif ( $keyword =~ /^(\d+)$/ ) {
-            push $params{id}, $keyword;
-        }
-        else {
-            push $params{alias}, $keyword;
-        }
-    }
-
-    my %filtered_params = map { @{ $params{$_} } ? ( $_ => $params{$_} ) : () } keys %params;
-
-    return %filtered_params;
-}
 
 __DATA__
 

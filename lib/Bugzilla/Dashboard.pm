@@ -317,6 +317,7 @@ sub mybugs {
 
     my @bugs = $self->search(
         assigned_to => [ $user || $self->user ],
+        status      => [ qw( UNCONFIRMED CONFIRMED IN_PROGRESS ) ],
     );
 
     return @bugs;

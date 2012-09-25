@@ -4,6 +4,8 @@ use utf8;
 use strict;
 use warnings;
 
+use DateTime::Format::ISO8601;
+
 my @exporting_methods = qw( 
     size
     creation_time
@@ -31,7 +33,14 @@ sub new {
         next unless ref($ainfo) eq 'HASH';
 
         my %_rename = map { ( "_$_" => $ainfo->{$_} ) } keys %$ainfo;
+        for my $key ( qw( last_change_time creation_time ) ) {
+            next unless $ainfo->{$key};
+            $_rename{"_$key"} = DateTime::Format::ISO8601->parse_datetime(
+                $ainfo->{$key},
+            );
+        }
         my $attachment = bless \%_rename, $class;
+
         push @attachments, $attachment;
     }
 

@@ -4,6 +4,8 @@ use utf8;
 use strict;
 use warnings;
 
+use DateTime::Format::ISO8601;
+
 my @exporting_methods = qw(
     id
     bug_id
@@ -28,6 +30,12 @@ sub new {
         next unless ref($comment_info) eq 'HASH';
 
         my %_rename = map { ( "_$_" => $comment_info->{$_} ) } keys %$comment_info;
+        for my $key ( qw( time creation_time ) ) {
+            next unless $comment_info->{$key};
+            $_rename{"_$key"} = DateTime::Format::ISO8601->parse_datetime(
+                $comment_info->{$key},
+            );
+        }
         my $comment = bless \%_rename, $class;
         push @comments, $comment;
     }

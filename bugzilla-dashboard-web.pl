@@ -203,27 +203,14 @@ any '/search' => sub {
     $self->redirect_to( 'login' ) unless $self->session('user');
 
     my $param = $self->req->params->to_hash;
-    $param->{query} ||= 'UNCONFIRMED CONFIRMED';
 
-    # Validation Rule
-    my $rule = [ query => [ 'not_blank' ] ];
-
-    my $vresult = $vc->validate($param, $rule);
-    if ($vresult->is_ok) {
-        my %search_params = $DASHBOARD->generate_query_params( $param->{query} );
-        my @mybugs = $DASHBOARD->search(%search_params);
-        @mybugs = reverse sort { $a->last_change_time->epoch cmp $b->last_change_time->epoch } @mybugs;
-        $self->stash(
-            view   => { bug => \@mybugs },
-            active => '/search',
-        );
-    }
-    else {
-        $self->stash(
-            view   => { error => 'validation failed' },
-            active => '/search',
-        );
-    }
+    my %search_params = $DASHBOARD->generate_query_params( $param->{query} );
+    my @mybugs = $DASHBOARD->search(%search_params);
+    @mybugs = reverse sort { $a->last_change_time->epoch cmp $b->last_change_time->epoch } @mybugs;
+    $self->stash(
+        view   => { bug => \@mybugs },
+        active => '/search',
+    );
 
     my $html = $self->render_partial('search')->to_string;
     $self->render_text(
@@ -458,13 +445,6 @@ __DATA__
 % layout 'default', csses => [];
 % title '빠른 검색';
 <div class="widget">
-  % if ($view->{error}) {
-  <div class="error"><%= $view->{error} %></div>
-  % }
-  <form method="post" enctype="application/x-www-form-urlencoded">
-    <input class="input-medium search-query" type="text" name="query" placeholder="검색할 키워드" />
-    <input class="btn btn-primary" type="submit" value="찾기" />
-  </form>
   %= include 'bugtable', bugs => $view->{bug};
 </div> <!-- widget -->
 
@@ -654,8 +634,11 @@ __DATA__
                 <a href="/login"> <i class="icon-lock"></i> Login </a>
             % }
           </li>
-
         </ul>
+
+        <form action="/search" method="post" class="navbar-search pull-right" enctype="application/x-www-form-urlencoded">
+          <input type="text" name="query" class="input-large search-query" placeholder="Search">
+        </form>
       </div> <!-- /nav-collapse -->
 
     </div> <!-- /container -->

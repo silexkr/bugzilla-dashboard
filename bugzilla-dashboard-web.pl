@@ -282,8 +282,10 @@ __DATA__
         %
         % my $uri   = session 'bugzilla_uri';
         % my $alink = sprintf qq{$uri/attachment.cgi};
+        % my $blink = sprintf qq{$uri/show_bug.cgi?id=%d}, $comment->bug_id;
         %
         % $comment_text =~ s{(attachment) (\d+)}{<a href="$alink?id=$2">$1 $2</a>}g;
+        % $comment_text =~ s{(comment) #(\d+)}{<a href="$blink#c$2">$1 #$2</a>}g;
         %
         <pre><%== $comment_text %></pre>
       </td>

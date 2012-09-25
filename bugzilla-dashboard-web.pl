@@ -335,12 +335,11 @@ __DATA__
     <thead>
       <tr>
         <th>버그</th>
-        <th>파일명</th>
         <!--
           -- this is future bugzilla feature
         -->
         <!-- <th>크기</th> -->
-        <th>요약</th>
+        <th>파일</th>
         <th>작성자</th>
         <th>변경시간</th>
       </tr>
@@ -353,16 +352,20 @@ __DATA__
             <%= $attachment->bug_id %>
           </a>
         </td>
-        <td>
-          <a href="<%= session 'bugzilla_uri' %>/attachment.cgi?id=<%= $attachment->id %>">
-            <%= $attachment->file_name %>
-          </a>
-        </td>
         <!--
           -- this is future bugzilla feature
         -->
         <!-- <td><%= $attachment->size %></td> -->
-        <td><%= $attachment->summary %></td>
+        <td>
+          <div>
+            <%= $attachment->summary %>
+          </div>
+          <div>
+            <a href="<%= session 'bugzilla_uri' %>/attachment.cgi?id=<%= $attachment->id %>">
+              <%= $attachment->file_name %>
+            </a>
+          </div>
+        </td>
         <td>
           % my $creator = $attachment->creator;
           % $creator =~ s/\@.*//;
@@ -604,7 +607,11 @@ __DATA__
     <div class="span6">&copy; <%= $copyright %>. All Rights Reserved.</div>
     <div class="span4 offset1">
       <span class="pull-right">
-      Built by <a href="http://www.perl.org/">Perl</a> &amp; <a href="http://mojolicio.us/">Mojolicious</a>
+      Built by
+        <a href="http://www.bugzilla.org/">Bugzilla</a>
+        <a href="http://mojolicio.us/">Mojolicious</a>
+        &amp;
+        <a href="http://www.perl.org/">Perl</a>,
       </span>
     </div>
     </div> <!-- /container -->

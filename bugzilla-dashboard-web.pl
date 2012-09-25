@@ -346,7 +346,13 @@ __DATA__
             <%= $creator %>
           </a>
         </td>
-        <td><%= $attachment->creation_time %></td>
+        <td>
+          % my $user = session 'user';
+          % my $dt = $attachment->creation_time;
+          % $dt->set_time_zone($user->{time_zone});
+          <%= $dt->ymd %>
+          <%= $dt->hms %>
+        </td>
       </tr>
       % }
     </tbody>

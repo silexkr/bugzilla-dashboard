@@ -110,6 +110,7 @@ any '/recent-comments' => sub {
             DateTime::Format::ISO8601->parse_datetime($param->{date}),
             $param->{limit},
         );
+
         $self->stash(
             view   => { comments => \@comments },
             active => '/recent-comments',
@@ -176,7 +177,7 @@ any '/mybugs' => sub {
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
         my @mybugs = $DASHBOARD->mybugs($param->{user});
-        @mybugs = reverse sort { $a->last_change_time cmp $b->last_change_time } @mybugs;
+        @mybugs = reverse sort { $a->last_change_time->epoch cmp $b->last_change_time->epoch } @mybugs;
         $self->stash(
             view   => { bug => \@mybugs },
             active => '/mybugs',
@@ -211,7 +212,7 @@ any '/search' => sub {
     if ($vresult->is_ok) {
         my %search_params = $DASHBOARD->generate_query_params( $param->{query} );
         my @mybugs = $DASHBOARD->search(%search_params);
-        @mybugs = reverse sort { $a->last_change_time cmp $b->last_change_time } @mybugs;
+        @mybugs = reverse sort { $a->last_change_time->epoch cmp $b->last_change_time->epoch } @mybugs;
         $self->stash(
             view   => { bug => \@mybugs },
             active => '/search',
@@ -241,7 +242,6 @@ __DATA__
     <tr>
       <th>커멘트</th>
       <th>작성자</th>
-      <th>변경시간</th>
       <th>댓글요약</th>
     </tr>
   </thead>
@@ -260,8 +260,14 @@ __DATA__
           <%= $creator %>
         </a>
       </td>
-      <td><%= $comment->time %></td>
       <td>
+        <div>
+          % my $user = session 'user';
+          % my $dt = $comment->time;
+          % $dt->set_time_zone($user->{time_zone});
+          <%= $dt->ymd %>
+          <%= $dt->hms %>
+        </div>
         <pre><%=
           length($comment->text) > $config->{comments_string_length}
             ? substr($comment->text, 0, $config->{comments_string_length}) .  '...'
@@ -389,7 +395,13 @@ __DATA__
         </a>
       </td>
       <td><%= $bug->summary %></td>
-      <td><%= $bug->last_change_time %></td>
+      <td>
+        % my $user = session 'user';
+        % my $dt = $bug->last_change_time;
+        % $dt->set_time_zone($user->{time_zone});
+        <%= $dt->ymd %>
+        <%= $dt->hms %>
+      </td>
       <td><a href="/search?query=<%= $bug->status %>"><%= $bug->status %></a></td>
       <td><a href="/search?query=<%= $bug->resolution %>"><%= $bug->resolution %></a></td>
     </tr>

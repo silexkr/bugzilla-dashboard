@@ -241,7 +241,6 @@ __DATA__
   <thead>
     <tr>
       <th>커멘트</th>
-      <th>작성자</th>
       <th>댓글요약</th>
     </tr>
   </thead>
@@ -254,25 +253,50 @@ __DATA__
         </a>
       </td>
       <td>
-        % my $creator = $comment->creator;
-        % $creator =~ s/\@.*//;
-        <a href="/search?query=@<%= $comment->creator %>">
-          <%= $creator %>
-        </a>
-      </td>
-      <td>
         <div>
-          % my $user = session 'user';
-          % my $dt = $comment->time;
-          % $dt->set_time_zone($user->{time_zone});
-          <%= $dt->ymd %>
-          <%= $dt->hms %>
+          <span>
+            % my $user = session 'user';
+            % my $dt = $comment->time;
+            % $dt->set_time_zone($user->{time_zone});
+            <%= $dt->ymd %>
+            <%= $dt->hms %>
+          </span>
+          -
+          <span>
+            % my $creator = $comment->creator;
+            % $creator =~ s/\@.*//;
+            <a href="/search?query=@<%= $comment->creator %>">
+              <%= $creator %>
+            </a>
+          </span>
         </div>
-        <pre><%=
-          length($comment->text) > $config->{comments_string_length}
-            ? substr($comment->text, 0, $config->{comments_string_length}) .  '...'
-            : $comment->text
-        %></pre>
+        % my $comment_text = $comment->text;
+        % $comment_text
+        %   = length($comment_text) > $config->{comments_string_length}
+        %   ? substr($comment_text, 0, $config->{comments_string_length}) .  '...'
+        %   : $comment_text
+        %   ;
+        %
+        % use Mojo::Util qw(html_escape);
+        % $comment_text = html_escape($comment_text);
+        %
+        % my $uri   = session 'bugzilla_uri';
+        % my $alink = sprintf qq{$uri/attachment.cgi};
+        % my $blink = sprintf qq{$uri/show_bug.cgi?id=%d}, $comment->bug_id;
+        %
+        %# using url regexp
+        %# http://blog.mattheworiordan.com/post/13174566389/url-regular-expression-for-links-with-or-without-the
+        % my $uri_regexp = qr<((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)>;
+        %
+        %# using email regexp
+        % my $email_regexp = qr<[A-Za-z0-9._%-]+\@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}>;
+        %
+        % $comment_text =~ s{($uri_regexp)}{<a href="$1">$1</a>}g;
+        % $comment_text =~ s{($email_regexp)}{<a href="mailto:$1">$1</a>}g;
+        % $comment_text =~ s{(attachment) (\d+)}{<a href="$alink?id=$2">$1 $2</a>}g;
+        % $comment_text =~ s{(comment) #(\d+)}{<a href="$blink#c$2">$1 #$2</a>}g;
+        %
+        <pre><%== $comment_text %></pre>
       </td>
     </tr>
     % }

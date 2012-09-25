@@ -284,6 +284,11 @@ __DATA__
         % my $alink = sprintf qq{$uri/attachment.cgi};
         % my $blink = sprintf qq{$uri/show_bug.cgi?id=%d}, $comment->bug_id;
         %
+        %# using url regexp
+        %# http://blog.mattheworiordan.com/post/13174566389/url-regular-expression-for-links-with-or-without-the
+        % my $uri_regexp = qr<((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)>;
+        %
+        % $comment_text =~ s{($uri_regexp)}{<a href="$1">$1</a>}g;
         % $comment_text =~ s{(attachment) (\d+)}{<a href="$alink?id=$2">$1 $2</a>}g;
         % $comment_text =~ s{(comment) #(\d+)}{<a href="$blink#c$2">$1 #$2</a>}g;
         %

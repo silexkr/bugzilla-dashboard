@@ -4,6 +4,8 @@ use utf8;
 use strict;
 use warnings;
 
+use DateTime::Format::ISO8601;
+
 my @exporting_methods = qw(
     priority
     creator
@@ -36,7 +38,14 @@ sub new {
         next unless ref($bug_info) eq 'HASH';
 
         my %_rename = map { ( "_$_" => $bug_info->{$_} ) } keys %$bug_info;
+        for my $key ( qw( last_change_time creation_time ) ) {
+            next unless $bug_info->{$key};
+            $_rename{"_$key"} = DateTime::Format::ISO8601->parse_datetime(
+                $bug_info->{$key},
+            );
+        }
         my $bug = bless \%_rename, $class;
+
         push @bugs, $bug;
     }
 

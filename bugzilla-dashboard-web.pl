@@ -379,10 +379,9 @@ __DATA__
   <thead>
     <tr>
       <th>제품</th>
-      <th>버그</th>
       <th>중요도</th>
       <th>담당자</th>
-      <th>제목</th>
+      <th>버그</th>
       <th>변경시간</th>
       <th>상태</th>
       <th>해결</th>
@@ -392,7 +391,6 @@ __DATA__
     % foreach my $bug (@$bugs) {
     <tr>
       <td><a href="/search?query=%3B<%= $bug->product %>"><%= $bug->product %></a></td>
-      <td><a href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $bug->id %>"><%= $bug->id %></a></td>
       <td>
         % my $priority;
         % given (uc $bug->priority) {
@@ -414,7 +412,11 @@ __DATA__
           <%= $assigned_to %>
         </a>
       </td>
-      <td><%= $bug->summary %></td>
+      <td>
+        <a href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $bug->id %>">
+          B<%= $bug->id %> - <%= $bug->summary %>
+        </a>
+      </td>
       <td>
         % my $user = session 'user';
         % my $dt = $bug->last_change_time;
@@ -588,9 +590,8 @@ __DATA__
     <div class="span4 offset1">
       <span class="pull-right">
       Built by
-        <a href="http://www.bugzilla.org/">Bugzilla</a>
-        <a href="http://mojolicio.us/">Mojolicious</a>
-        &amp;
+        <a href="http://www.bugzilla.org/">Bugzilla</a>,
+        <a href="http://mojolicio.us/">Mojolicious</a> &amp;
         <a href="http://www.perl.org/">Perl</a>,
       </span>
     </div>

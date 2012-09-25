@@ -204,13 +204,14 @@ sub generate_query_params {
         elsif ( $keyword ~~ \@resolution ) {
             push @{ $params{resolution} }, $keyword;
         }
-        elsif ( $keyword =~ /^P(\d)$/ ) {
+        elsif ( $keyword =~ /^P([1-5\-])$/ ) {
             given ($1) {
-                push @{ $params{priority} }, 'HIGHEST' when 1;
-                push @{ $params{priority} }, 'HIGH'    when 2;
-                push @{ $params{priority} }, 'NORMAL'  when 3;
-                push @{ $params{priority} }, 'LOW'     when 4;
-                push @{ $params{priority} }, 'LOWEST'  when 5;
+                push @{ $params{priority} }, 'HIGHEST' when '1';
+                push @{ $params{priority} }, 'HIGH'    when '2';
+                push @{ $params{priority} }, 'NORMAL'  when '3';
+                push @{ $params{priority} }, 'LOW'     when '4';
+                push @{ $params{priority} }, 'LOWEST'  when '5';
+                push @{ $params{priority} }, '---'     when '-';
                 default { push @{ $params{priority} }, '---'; }
             }
         }

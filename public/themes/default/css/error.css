@@ -1,0 +1,27 @@
+/* error */
+.error-container {
+    margin-bottom: 10em;
+    margin-top: 10em;
+    text-align: center;
+}
+
+.error-container h1 {
+    font-size: 120px;
+    line-height: 1em;
+    margin-bottom: 0.5em;
+}
+
+.error-container h2 {
+    font-size: 56px;
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+}
+
+.error-container .error-details {
+    font-size: 16px;
+    margin-bottom: 1.5em;
+}
+
+.error-container .error-actions a {
+    margin: 0 0.5em;
+}

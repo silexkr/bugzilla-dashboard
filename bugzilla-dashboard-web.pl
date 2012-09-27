@@ -292,7 +292,7 @@ __DATA__
 
 
 @@ recent-comments.html.ep
-% layout 'default', csses => [];
+% layout 'default', csses => [], jses => [];
 % title '최근 변경 이력의 제공';
 <div class="widget">
   % if ($view->{error}) {
@@ -308,7 +308,7 @@ __DATA__
 
 
 @@ recent-attachments.html.ep
-% layout 'default', csses => [];
+% layout 'default', csses => [], jses => [];
 % title '최근 추가된 첨부파일';
 <div class="widget">
   % if ($view->{error}) {
@@ -433,7 +433,7 @@ __DATA__
 
 
 @@ mybugs.html.ep
-% layout 'default', csses => [];
+% layout 'default', csses => [], jses => [];
 % title '내 버그';
 <div class="widget">
   % if ($view->{error}) {
@@ -444,7 +444,7 @@ __DATA__
 
 
 @@ search.html.ep
-% layout 'default', csses => [];
+% layout 'default', csses => [], jses => [];
 % title '빠른 검색';
 <div class="widget">
   %= include 'bugtable', bugs => $view->{bug};
@@ -492,15 +492,13 @@ __DATA__
 <meta name="author" content="">
 
 <!-- Le styles -->
-<link type="text/css" rel="stylesheet" href="/adminia/css/bootstrap.min.css">
-<link type="text/css" rel="stylesheet" href="/adminia/css/bootstrap-responsive.min.css">
+<link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/bootstrap/css/bootstrap.min.css">
+<link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/bootstrap/css/bootstrap-responsive.min.css">
 <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
-<link type="text/css" rel="stylesheet" href="/adminia/css/font-awesome.css">
-<link type="text/css" rel="stylesheet" href="/adminia/css/adminia.css">
-<link type="text/css" rel="stylesheet" href="/adminia/css/adminia-responsive.css">
-<link type="text/css" rel="stylesheet" href="/adminia/css/style.css">
+<link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/font-awesome/font-awesome.css">
+<link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/css/style.css">
 % for my $css (@$csses) {
-  <link type="text/css" rel="stylesheet" href="<%= $css %>">
+  <link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/css/<%= $css %>">
 % }
 
 <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -517,15 +515,11 @@ __DATA__
 <!-- Le javascript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<script type="text/javascript" src="/adminia/js/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="/adminia/js/excanvas.min.js"></script>
-<script type="text/javascript" src="/adminia/js/jquery.flot.js"></script>
-<script type="text/javascript" src="/adminia/js/jquery.flot.pie.js"></script>
-<script type="text/javascript" src="/adminia/js/jquery.flot.orderBars.js"></script>
-<script type="text/javascript" src="/adminia/js/jquery.flot.resize.js"></script>
-
-<script type="text/javascript" src="/adminia/js/bootstrap.js"></script>
-<script type="text/javascript" src="/adminia/js/charts/bar.js"></script>
+<script type="text/javascript" src="/js/jquery-1.8.2.min.js"></script>
+<script type="text/javascript" src="/themes/<%= $theme %>/bootstrap/js/bootstrap.min.js"></script>
+% for my $js (@$jses) {
+  <script type="text/javascript" src="/js/<%= $js %>"></script>
+% }
 
 % if ($google_analytics) {
   <!-- google analytics -->
@@ -592,7 +586,7 @@ __DATA__
       Built by
         <a href="http://www.bugzilla.org/">Bugzilla</a>,
         <a href="http://mojolicio.us/">Mojolicious</a> &amp;
-        <a href="http://www.perl.org/">Perl</a>,
+        <a href="http://www.perl.org/">Perl</a>
       </span>
     </div>
     </div> <!-- /container -->
@@ -663,15 +657,15 @@ __DATA__
       <div class="container">
         <div class="row">
 
-          <div class="span3">
+          <div class="span2">
             %= include 'layouts/header'
-          </div> <!-- span3 -->
+          </div> <!-- span2 -->
 
-          <div class="span9">
+          <div class="span10">
             <div class="error-container">
               <%= content %>
             </div> <!-- error-container >
-          </div> <!-- span9 -->
+          </div> <!-- span10 -->
 
         </div> <!-- /row -->
       </div>
@@ -684,7 +678,7 @@ __DATA__
 
 
 @@ not_found.html.ep
-% layout 'error', csses => [ '/adminia/css/pages/error.css' ];
+% layout 'error', csses => [ 'error.css' ], jses => [];
 % title '404 Not Found';
 <h2>404 Not Found</h2>
 
@@ -722,7 +716,7 @@ __DATA__
 
 
 @@ login.html.ep
-% layout 'login', csses => [ '/adminia/css/pages/login.css' ];
+% layout 'login', csses => [ 'login.css' ], jses => [];
 % title 'Login';
 <div id="login-header">
   <h3> <i class="icon-lock"></i> Login </h3>

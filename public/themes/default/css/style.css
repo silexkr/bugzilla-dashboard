@@ -1,0 +1,126 @@
+body {
+    font-family: 'Open Sans',arial,sans-serif;
+    font-size: 13px;
+    font-size-adjust: none;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    line-height: 1.7em;
+}
+
+#main-nav.nav-tabs.nav-stacked > li > a {
+    border-bottom-color: #D5D5D5;
+    border-left-color: #D5D5D5;
+    border-right-color: #D5D5D5;
+    border-top-color: #D5D5D5;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+
+    color: #4A515B;
+    font-size: 12px;
+    font-weight: 600;
+    padding-bottom: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 6px;
+}
+
+#main-nav.nav-tabs.nav-stacked > li:first-child > a,
+#main-nav.nav-tabs.nav-stacked > li:last-child > a {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+#main-nav.nav-tabs.nav-stacked > li.active > a,
+#main-nav.nav-tabs.nav-stacked > li > a:hover {
+    background: #F2F2F2;
+    background-image: -moz-linear-gradient(top, #FFFFFF 0%, #F2F2F2 100%); /* FF3.6+ */
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#FFFFFF), to(#F2F2F2));
+    background-image: -webkit-linear-gradient(top, #FFFFFF, #F2F2F2);
+    background-image: -o-linear-gradient(top, #FFFFFF 0%,#F2F2F2 100%); /* Opera11.10+ */
+    background-image: -ms-linear-gradient(top, #FFFFFF 0%,#F2F2F2 100%); /* IE10+ */
+    background-image: linear-gradient(to bottom, #FFFFFF 0%,#F2F2F2 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFFFFF', endColorstr='#F2F2F2');
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFFFFF', endColorstr='#F2F2F2')";
+    border-bottom-color: #CCCCDD;
+    border-left-color: #CCCCDD;
+    border-right-color: #CCCCDD;
+    border-top-color: #CCCCDD;
+}
+
+.navbar .brand {
+    font-size: 18px;
+    font-weight: 600;
+    position: relative;
+    top: 2px;
+    padding-bottom: 12px;
+    padding-top: 8px;
+}
+
+.widget {
+    clear: both;
+    margin-bottom: 2em;
+    position: relative;
+    width: auto;
+}
+
+.account-container {
+    display: table;
+}
+
+.account-avatar {
+    padding-right: 1em;
+}
+
+.account-avatar,
+.account-details {
+    display: table-cell;
+    vertical-align: top;
+}
+
+.account-avatar img {
+    height: 55px;
+    width: 55px;
+}
+
+.account-details .account-name {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.account-details span {
+    display: block;
+}
+
+.account-details .account-role {
+    color: #888888;
+}
+
+.account-details .account-actions {
+    color: #BBBBBB;
+}
+
+#main-nav.nav-tabs.nav-stacked > li {
+    margin-bottom: 4px;
+}
+
+hr {
+    border-top-color: #DDDDDD;
+}
+
+#content {
+    padding-top: 70px;
+}
+
+#footer {
+    text-transform: uppercase;
+}
+
+.table-hover tbody tr:hover th,
+.table-hover tbody tr:hover td {
+    background-color: #ffff66;
+}

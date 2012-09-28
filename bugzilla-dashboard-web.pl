@@ -219,6 +219,108 @@ any '/search' => sub {
     );
 };
 
+get  '/create-bug' => sub {
+    my $self = shift;
+
+    $self->redirect_to( 'login' ) unless $self->session('user');
+
+    my $param = $self->req->params->to_hash;
+    $param->{product}   ||= $config->{default_product}   || q{};
+    $param->{component} ||= $config->{default_component} || q{};
+    $param->{version}   ||= $config->{default_version}   || q{};
+
+    # Validation Rule
+    my $rule = [
+        product     => ['not_blank'],
+        component   => ['not_blank'],
+        version     => ['not_blank'],
+    ];
+
+    my %view = (
+        product   => $param->{product},
+        component => $param->{component},
+        version   => $param->{version},
+    );
+
+    my $vresult = $vc->validate($param, $rule);
+    $self->stash( error => 'validation failed' ) unless $vresult->is_ok;
+    $self->stash(
+        active => '/create-bug',
+        view   => \%view,
+    );
+
+    my $html = $self->render_partial('create-bug')->to_string;
+    $self->render_text(
+        HTML::FillInForm::Lite->fill(\$html, $param),
+        format => 'html',
+    );
+};
+
+post '/create-bug' => sub {
+    my $self = shift;
+
+    $self->redirect_to( 'login' ) unless $self->session('user');
+
+    my $param = $self->req->params->to_hash;
+    $param->{product}   ||= $config->{default_product};
+    $param->{component} ||= $config->{default_component};
+    $param->{version}   ||= $config->{default_version};
+
+    # Validation Rule
+    my $rule = [
+        product     => ['not_blank'],
+        component   => ['not_blank'],
+        version     => ['not_blank'],
+        summary     => ['not_blank'],
+        description => ['not_blank'],
+    ];
+
+    my %view = (
+        product   => $param->{product},
+        component => $param->{component},
+        version   => $param->{version},
+    );
+
+    my $vresult = $vc->validate($param, $rule);
+    if ($vresult->is_ok) {
+        my $bug = $DASHBOARD->create_bug(
+            product     => $param->{product},
+            component   => $param->{component},
+            version     => $param->{version},
+            summary     => $param->{summary},
+            description => $param->{description},
+        );
+
+        if ($bug) {
+            $view{success} = "Bug $bug was created";
+
+            $view{summary}     = q{};
+            $view{description} = q{};
+        }
+        else {
+            $view{error} = $DASHBOARD->error;
+
+            $view{product}   = $config->{default_product};
+            $view{component} = $config->{default_component};
+            $view{version}   = $config->{default_version};
+        }
+    }
+    else {
+        $view{error} = 'validation failed';
+    }
+
+    $self->stash(
+        active => '/create-bug',
+        view   => \%view,
+    );
+
+    my $html = $self->render_partial('create-bug')->to_string;
+    $self->render_text(
+        HTML::FillInForm::Lite->fill( \$html, { %$param, %view } ),
+        format => 'html',
+    );
+};
+
 app->start;
 
 __DATA__
@@ -432,6 +534,39 @@ __DATA__
 % layout 'default', csses => [], jses => [];
 % title '빠른 검색';
 %= include 'bugtable', bugs => $view->{bug};
+
+
+@@ create-bug.html.ep
+% layout 'default', csses => [], jses => [];
+% title '버그 만들기';
+<div>
+  <form action="/create-bug" method="post" class="form-horizontal">
+
+    <div class="control-group">
+      <label class="control-label" for="summary">Summary</label>
+      <div class="controls"> <input type="text" class="span6" id="summary" name="summary"> </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="description">Description</label>
+      <div class="controls"> <textarea rows="20" class="span6" id="description" name="description"></textarea> </div>
+    </div>
+
+    <input type="hidden" id="product" name="product">
+    <input type="hidden" id="component" name="component">
+    <input type="hidden" id="version" name="version">
+
+    <div class="form-actions">
+      <input class="btn btn-primary" type="submit" value="Create a New Bug">
+      <span>
+        as
+        <strong><%= $view->{product} %></strong> /
+        <strong><%= $view->{component} %></strong> /
+        <strong><%= $view->{version} %></strong>
+      </span>
+    </div>
+  </form>
+</div>
 
 
 @@ layouts/default.html.ep

@@ -25,7 +25,7 @@ print($usage->text), exit if $opt->help;
 my %connect_info;
 $connect_info{user}     = $opt->user     if $opt->user;
 $connect_info{password} = $opt->password if $opt->password;
-$connect_info{uri}      = $opt->uir      if $opt->uri;
+$connect_info{uri}      = $opt->uri      if $opt->uri;
 
 my $dashboard = Bugzilla::Dashboard->new(%connect_info)
     or die "cannot connect to json-rpc server\n";

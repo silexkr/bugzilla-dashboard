@@ -24,6 +24,7 @@ my @exporting_methods = qw(
     component
     product
     is_open
+    version
 );
 
 for my $method (@exporting_methods) {

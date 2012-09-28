@@ -12,6 +12,24 @@ Bugzilla::Dashboard
 - IRC Notification ( bug 292 )
 
 
+버그질라 설정
+--------------
+
+버그 생성시 사용하고 있는 버그질라의 어떤 제품(product)과
+요소(component), 버전 값을 기본으로 사용할지 결정해야 합니다.
+제품 기본 값은 `Undef`이며, 요소 기본 값은 `Undef`,
+버전 기본 값은 `unspecified` 입니다.
+버그질라에 각각 `Undef` 제품과 요소를 추가하거나
+설정파일에서 다음 항목을 적절한 값으로 변경해야 합니다.
+
+    #
+    # for create-bug
+    #
+    default_product   => 'Undef',
+    default_component => 'Undef',
+    default_version   => 'unspecified',
+
+
 환경 변수
 ----------
 

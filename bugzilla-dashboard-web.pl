@@ -219,6 +219,108 @@ any '/search' => sub {
     );
 };
 
+get  '/create-bug' => sub {
+    my $self = shift;
+
+    $self->redirect_to( 'login' ) unless $self->session('user');
+
+    my $param = $self->req->params->to_hash;
+    $param->{product}   ||= $config->{default_product}   || q{};
+    $param->{component} ||= $config->{default_component} || q{};
+    $param->{version}   ||= $config->{default_version}   || q{};
+
+    # Validation Rule
+    my $rule = [
+        product     => ['not_blank'],
+        component   => ['not_blank'],
+        version     => ['not_blank'],
+    ];
+
+    my %view = (
+        product   => $param->{product},
+        component => $param->{component},
+        version   => $param->{version},
+    );
+
+    my $vresult = $vc->validate($param, $rule);
+    $self->stash( error => 'validation failed' ) unless $vresult->is_ok;
+    $self->stash(
+        active => '/create-bug',
+        view   => \%view,
+    );
+
+    my $html = $self->render_partial('create-bug')->to_string;
+    $self->render_text(
+        HTML::FillInForm::Lite->fill(\$html, $param),
+        format => 'html',
+    );
+};
+
+post '/create-bug' => sub {
+    my $self = shift;
+
+    $self->redirect_to( 'login' ) unless $self->session('user');
+
+    my $param = $self->req->params->to_hash;
+    $param->{product}   ||= $config->{default_product};
+    $param->{component} ||= $config->{default_component};
+    $param->{version}   ||= $config->{default_version};
+
+    # Validation Rule
+    my $rule = [
+        product     => ['not_blank'],
+        component   => ['not_blank'],
+        version     => ['not_blank'],
+        summary     => ['not_blank'],
+        description => ['not_blank'],
+    ];
+
+    my %view = (
+        product   => $param->{product},
+        component => $param->{component},
+        version   => $param->{version},
+    );
+
+    my $vresult = $vc->validate($param, $rule);
+    if ($vresult->is_ok) {
+        my $bug = $DASHBOARD->create_bug(
+            product     => $param->{product},
+            component   => $param->{component},
+            version     => $param->{version},
+            summary     => $param->{summary},
+            description => $param->{description},
+        );
+
+        if ($bug) {
+            $view{success} = "Bug $bug was created";
+
+            $view{summary}     = q{};
+            $view{description} = q{};
+        }
+        else {
+            $view{error} = $DASHBOARD->error;
+
+            $view{product}   = $config->{default_product};
+            $view{component} = $config->{default_component};
+            $view{version}   = $config->{default_version};
+        }
+    }
+    else {
+        $view{error} = 'validation failed';
+    }
+
+    $self->stash(
+        active => '/create-bug',
+        view   => \%view,
+    );
+
+    my $html = $self->render_partial('create-bug')->to_string;
+    $self->render_text(
+        HTML::FillInForm::Lite->fill( \$html, { %$param, %view } ),
+        format => 'html',
+    );
+};
+
 app->start;
 
 __DATA__
@@ -294,84 +396,74 @@ __DATA__
 @@ recent-comments.html.ep
 % layout 'default', csses => [], jses => [];
 % title '최근 변경 이력의 제공';
-<div class="widget">
-  % if ($view->{error}) {
-  <div class="error"><%= $view->{error} %></div>
-  % }
-  <form method="post" enctype="application/x-www-form-urlencoded">
-    <input class="input-medium" type="text" name="date" placeholder="검색을 시작할 날짜" />
-    <input class="input-medium" type="text" name="limit" placeholder="갯수" />
-    <input class="btn btn-primary" type="submit" value="찾기" />
-  </form>
-  %= include 'commenttable', comments => $view->{comments};
-</div> <!-- widget -->
+<form method="post" enctype="application/x-www-form-urlencoded">
+  <input class="input-medium" type="text" name="date" placeholder="검색을 시작할 날짜" />
+  <input class="input-medium" type="text" name="limit" placeholder="갯수" />
+  <input class="btn btn-primary" type="submit" value="찾기" />
+</form>
+%= include 'commenttable', comments => $view->{comments};
 
 
 @@ recent-attachments.html.ep
 % layout 'default', csses => [], jses => [];
 % title '최근 추가된 첨부파일';
-<div class="widget">
-  % if ($view->{error}) {
-  <div class="error"><%= $view->{error} %></div>
-  % }
-  <form method="post" enctype="application/x-www-form-urlencoded">
-    <input class="input-medium" type="text" name="limit" placeholder="갯수" />
-    <input class="btn btn-primary" type="submit" value="찾기" />
-  </form>
-  <table class="table table-striped table-bordered table-hover">
-    <thead>
-      <tr>
-        <th>버그</th>
-        <!--
-          -- this is future bugzilla feature
-        -->
-        <!-- <th>크기</th> -->
-        <th>파일</th>
-        <th>작성자</th>
-        <th>변경시간</th>
-      </tr>
-    </thead>
-    <tbody>
-      % foreach my $attachment (@{ $view->{attachments} }) {
-      <tr>
-        <td>
-          <a href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $attachment->bug_id %>">
-            <%= $attachment->bug_id %>
+<form method="post" enctype="application/x-www-form-urlencoded">
+  <input class="input-medium" type="text" name="limit" placeholder="갯수" />
+  <input class="btn btn-primary" type="submit" value="찾기" />
+</form>
+<table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>버그</th>
+      <!--
+        -- this is future bugzilla feature
+      -->
+      <!-- <th>크기</th> -->
+      <th>파일</th>
+      <th>작성자</th>
+      <th>변경시간</th>
+    </tr>
+  </thead>
+  <tbody>
+    % foreach my $attachment (@{ $view->{attachments} }) {
+    <tr>
+      <td>
+        <a href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $attachment->bug_id %>">
+          <%= $attachment->bug_id %>
+        </a>
+      </td>
+      <!--
+        -- this is future bugzilla feature
+      -->
+      <!-- <td><%= $attachment->size %></td> -->
+      <td>
+        <div>
+          <%= $attachment->summary %>
+        </div>
+        <div>
+          <a href="<%= session 'bugzilla_uri' %>/attachment.cgi?id=<%= $attachment->id %>">
+            <%= $attachment->file_name %>
           </a>
-        </td>
-        <!--
-          -- this is future bugzilla feature
-        -->
-        <!-- <td><%= $attachment->size %></td> -->
-        <td>
-          <div>
-            <%= $attachment->summary %>
-          </div>
-          <div>
-            <a href="<%= session 'bugzilla_uri' %>/attachment.cgi?id=<%= $attachment->id %>">
-              <%= $attachment->file_name %>
-            </a>
-          </div>
-        </td>
-        <td>
-          % my $creator = $attachment->creator;
-          % $creator =~ s/\@.*//;
-          <a href="/search?query=@<%= $attachment->creator %>">
-            <%= $creator %>
-          </a>
-        </td>
-        <td>
-          % my $user = session 'user';
-          % my $dt = $attachment->creation_time;
-          % $dt->set_time_zone($user->{time_zone});
-          <%= $dt->ymd %>
-          <%= $dt->hms %>
-        </td>
-      </tr>
-      % }
-    </tbody>
-  </table>
-</div> <!-- widget -->
+        </div>
+      </td>
+      <td>
+        % my $creator = $attachment->creator;
+        % $creator =~ s/\@.*//;
+        <a href="/search?query=@<%= $attachment->creator %>">
+          <%= $creator %>
+        </a>
+      </td>
+      <td>
+        % my $user = session 'user';
+        % my $dt = $attachment->creation_time;
+        % $dt->set_time_zone($user->{time_zone});
+        <%= $dt->ymd %>
+        <%= $dt->hms %>
+      </td>
+    </tr>
+    % }
+  </tbody>
+</table>
 
 
 @@ bugtable.html.ep
@@ -435,20 +527,46 @@ __DATA__
 @@ mybugs.html.ep
 % layout 'default', csses => [], jses => [];
 % title '내 버그';
-<div class="widget">
-  % if ($view->{error}) {
-    <div class="error"><%= $view->{error} %></div>
-  % }
-  %= include 'bugtable', bugs => $view->{bug};
-</div> <!-- widget -->
+%= include 'bugtable', bugs => $view->{bug};
 
 
 @@ search.html.ep
 % layout 'default', csses => [], jses => [];
 % title '빠른 검색';
-<div class="widget">
-  %= include 'bugtable', bugs => $view->{bug};
-</div> <!-- widget -->
+%= include 'bugtable', bugs => $view->{bug};
+
+
+@@ create-bug.html.ep
+% layout 'default', csses => [], jses => [];
+% title '버그 만들기';
+<div>
+  <form action="/create-bug" method="post" class="form-horizontal">
+
+    <div class="control-group">
+      <label class="control-label" for="summary">Summary</label>
+      <div class="controls"> <input type="text" class="span6" id="summary" name="summary"> </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="description">Description</label>
+      <div class="controls"> <textarea rows="20" class="span6" id="description" name="description"></textarea> </div>
+    </div>
+
+    <input type="hidden" id="product" name="product">
+    <input type="hidden" id="component" name="component">
+    <input type="hidden" id="version" name="version">
+
+    <div class="form-actions">
+      <input class="btn btn-primary" type="submit" value="Create a New Bug">
+      <span>
+        as
+        <strong><%= $view->{product} %></strong> /
+        <strong><%= $view->{component} %></strong> /
+        <strong><%= $view->{version} %></strong>
+      </span>
+    </div>
+  </form>
+</div>
 
 
 @@ layouts/default.html.ep
@@ -472,7 +590,19 @@ __DATA__
           </div> <!-- span2 -->
 
           <div class="span10">
-            <%= content %>
+
+            <div class="widget">
+              % if ($view->{error}) {
+              <div class="alert alert-error"><%= $view->{error} %></div>
+              % }
+              % if ($view->{success}) {
+              <div class="alert alert-success"><%= $view->{success} %></div>
+              % }
+
+              <%= content %>
+
+            </div> <!-- widget -->
+
           </div> <!-- span10 -->
 
         </div> <!-- /row -->

@@ -550,4 +550,60 @@ sub recent_comments {
     return @comments;
 }
 
+sub create_bug {
+    my ( $self, %params ) = @_;
+
+    return unless $self->_jsonrpc;
+    return unless $self->_cookie;
+
+    $self->{_error} = 'Bug.create: product is needed',     return unless $params{product};
+    $self->{_error} = 'Bug.create: component is needed',   return unless $params{component};
+    $self->{_error} = 'Bug.create: summary is needed',     return unless $params{summary};
+    $self->{_error} = 'Bug.create: version is needed',     return unless $params{version};
+    $self->{_error} = 'Bug.create: description is needed', return unless $params{description};
+
+    my $client = $self->_jsonrpc;
+    my $res = try {
+        # http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Bug.html#create
+        $client->call(
+            $self->uri,
+            { # callobj
+                method => "Bug.create",
+                params => {
+                    %params,
+                },
+            },
+            $self->_cookie,
+        );
+    };
+
+    unless ($res) {
+        $self->{_error} = 'Bug.create: ' . $client->status_line;
+        return;
+    }
+
+    if ( $res->is_error ) {
+        $self->{_error} = 'Bug.comments: ';
+        given ( $res->obj->code ) {
+            $self->{_error} .= '51 (Invalid Object)'            when 51;
+            $self->{_error} .= '103 (Invalid Alias)'            when 103;
+            $self->{_error} .= '104 (Invalid Field)'            when 104;
+            $self->{_error} .= '105 (Invalid Component)'        when 105;
+            $self->{_error} .= '106 (Invalid Product)'          when 106;
+            $self->{_error} .= '107 (Invalid Summary)'          when 107;
+            $self->{_error} .= '116 (Dependency Loop)'          when 116;
+            $self->{_error} .= '120 (Group Restriction Denied)' when 120;
+            $self->{_error} .= '504 (Invalid User)'             when 504;
+            default { $self->{_error} .= $res->error_message; }
+        }
+        return;
+    }
+
+    my $result = $res->result;
+    $self->{_error} = 'Bug.create: failed by unknwon reason', return unless $result;
+    $self->{_error} = 'Bug.create: failed by unknwon reason', return unless $result->{id};
+
+    return $result->{id};
+}
+
 1;

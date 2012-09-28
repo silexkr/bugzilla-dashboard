@@ -294,84 +294,74 @@ __DATA__
 @@ recent-comments.html.ep
 % layout 'default', csses => [], jses => [];
 % title '최근 변경 이력의 제공';
-<div class="widget">
-  % if ($view->{error}) {
-  <div class="error"><%= $view->{error} %></div>
-  % }
-  <form method="post" enctype="application/x-www-form-urlencoded">
-    <input class="input-medium" type="text" name="date" placeholder="검색을 시작할 날짜" />
-    <input class="input-medium" type="text" name="limit" placeholder="갯수" />
-    <input class="btn btn-primary" type="submit" value="찾기" />
-  </form>
-  %= include 'commenttable', comments => $view->{comments};
-</div> <!-- widget -->
+<form method="post" enctype="application/x-www-form-urlencoded">
+  <input class="input-medium" type="text" name="date" placeholder="검색을 시작할 날짜" />
+  <input class="input-medium" type="text" name="limit" placeholder="갯수" />
+  <input class="btn btn-primary" type="submit" value="찾기" />
+</form>
+%= include 'commenttable', comments => $view->{comments};
 
 
 @@ recent-attachments.html.ep
 % layout 'default', csses => [], jses => [];
 % title '최근 추가된 첨부파일';
-<div class="widget">
-  % if ($view->{error}) {
-  <div class="error"><%= $view->{error} %></div>
-  % }
-  <form method="post" enctype="application/x-www-form-urlencoded">
-    <input class="input-medium" type="text" name="limit" placeholder="갯수" />
-    <input class="btn btn-primary" type="submit" value="찾기" />
-  </form>
-  <table class="table table-striped table-bordered table-hover">
-    <thead>
-      <tr>
-        <th>버그</th>
-        <!--
-          -- this is future bugzilla feature
-        -->
-        <!-- <th>크기</th> -->
-        <th>파일</th>
-        <th>작성자</th>
-        <th>변경시간</th>
-      </tr>
-    </thead>
-    <tbody>
-      % foreach my $attachment (@{ $view->{attachments} }) {
-      <tr>
-        <td>
-          <a href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $attachment->bug_id %>">
-            <%= $attachment->bug_id %>
+<form method="post" enctype="application/x-www-form-urlencoded">
+  <input class="input-medium" type="text" name="limit" placeholder="갯수" />
+  <input class="btn btn-primary" type="submit" value="찾기" />
+</form>
+<table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>버그</th>
+      <!--
+        -- this is future bugzilla feature
+      -->
+      <!-- <th>크기</th> -->
+      <th>파일</th>
+      <th>작성자</th>
+      <th>변경시간</th>
+    </tr>
+  </thead>
+  <tbody>
+    % foreach my $attachment (@{ $view->{attachments} }) {
+    <tr>
+      <td>
+        <a href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $attachment->bug_id %>">
+          <%= $attachment->bug_id %>
+        </a>
+      </td>
+      <!--
+        -- this is future bugzilla feature
+      -->
+      <!-- <td><%= $attachment->size %></td> -->
+      <td>
+        <div>
+          <%= $attachment->summary %>
+        </div>
+        <div>
+          <a href="<%= session 'bugzilla_uri' %>/attachment.cgi?id=<%= $attachment->id %>">
+            <%= $attachment->file_name %>
           </a>
-        </td>
-        <!--
-          -- this is future bugzilla feature
-        -->
-        <!-- <td><%= $attachment->size %></td> -->
-        <td>
-          <div>
-            <%= $attachment->summary %>
-          </div>
-          <div>
-            <a href="<%= session 'bugzilla_uri' %>/attachment.cgi?id=<%= $attachment->id %>">
-              <%= $attachment->file_name %>
-            </a>
-          </div>
-        </td>
-        <td>
-          % my $creator = $attachment->creator;
-          % $creator =~ s/\@.*//;
-          <a href="/search?query=@<%= $attachment->creator %>">
-            <%= $creator %>
-          </a>
-        </td>
-        <td>
-          % my $user = session 'user';
-          % my $dt = $attachment->creation_time;
-          % $dt->set_time_zone($user->{time_zone});
-          <%= $dt->ymd %>
-          <%= $dt->hms %>
-        </td>
-      </tr>
-      % }
-    </tbody>
-  </table>
-</div> <!-- widget -->
+        </div>
+      </td>
+      <td>
+        % my $creator = $attachment->creator;
+        % $creator =~ s/\@.*//;
+        <a href="/search?query=@<%= $attachment->creator %>">
+          <%= $creator %>
+        </a>
+      </td>
+      <td>
+        % my $user = session 'user';
+        % my $dt = $attachment->creation_time;
+        % $dt->set_time_zone($user->{time_zone});
+        <%= $dt->ymd %>
+        <%= $dt->hms %>
+      </td>
+    </tr>
+    % }
+  </tbody>
+</table>
 
 
 @@ bugtable.html.ep
@@ -435,20 +425,13 @@ __DATA__
 @@ mybugs.html.ep
 % layout 'default', csses => [], jses => [];
 % title '내 버그';
-<div class="widget">
-  % if ($view->{error}) {
-    <div class="error"><%= $view->{error} %></div>
-  % }
-  %= include 'bugtable', bugs => $view->{bug};
-</div> <!-- widget -->
+%= include 'bugtable', bugs => $view->{bug};
 
 
 @@ search.html.ep
 % layout 'default', csses => [], jses => [];
 % title '빠른 검색';
-<div class="widget">
-  %= include 'bugtable', bugs => $view->{bug};
-</div> <!-- widget -->
+%= include 'bugtable', bugs => $view->{bug};
 
 
 @@ layouts/default.html.ep
@@ -472,7 +455,19 @@ __DATA__
           </div> <!-- span2 -->
 
           <div class="span10">
-            <%= content %>
+
+            <div class="widget">
+              % if ($view->{error}) {
+              <div class="alert alert-error"><%= $view->{error} %></div>
+              % }
+              % if ($view->{success}) {
+              <div class="alert alert-success"><%= $view->{success} %></div>
+              % }
+
+              <%= content %>
+
+            </div> <!-- widget -->
+
           </div> <!-- span10 -->
 
         </div> <!-- /row -->

@@ -556,11 +556,11 @@ sub create_bug {
     return unless $self->_jsonrpc;
     return unless $self->_cookie;
 
-    return unless $params{product};
-    return unless $params{component};
-    return unless $params{summary};
-    return unless defined $params{version};     # required but can be empty
-    return unless defined $params{description}; # not required but we recommend
+    $self->{_error} = 'Bug.create: product is needed',     return unless $params{product};
+    $self->{_error} = 'Bug.create: component is needed',   return unless $params{component};
+    $self->{_error} = 'Bug.create: summary is needed',     return unless $params{summary};
+    $self->{_error} = 'Bug.create: version is needed',     return unless $params{version};
+    $self->{_error} = 'Bug.create: description is needed', return unless $params{description};
 
     my $client = $self->_jsonrpc;
     my $res = try {
@@ -600,8 +600,8 @@ sub create_bug {
     }
 
     my $result = $res->result;
-    return unless $result;
-    return unless $result->{id};
+    $self->{_error} = 'Bug.create: failed by unknwon reason', return unless $result;
+    $self->{_error} = 'Bug.create: failed by unknwon reason', return unless $result->{id};
 
     return $result->{id};
 }

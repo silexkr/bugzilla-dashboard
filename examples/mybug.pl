@@ -24,7 +24,7 @@ print($usage->text), exit if $opt->help;
 my %connect_info;
 $connect_info{user}     = $opt->user     if $opt->user;
 $connect_info{password} = $opt->password if $opt->password;
-$connect_info{uri}      = $opt->uir      if $opt->uri;
+$connect_info{uri}      = $opt->uri      if $opt->uri;
 
 my $dashboard = Bugzilla::Dashboard->new(%connect_info)
     or die "cannot connect to json-rpc server\n";
@@ -34,6 +34,9 @@ for my $bug (@bugs) {
     say "ID: ", $bug->id;
     say "    SUMMARY: ", $bug->summary;
     say "    CREATOR: ", $bug->creator;
+    say "    PRODUCT: ", $bug->product;
+    say "  COMPONENT: ", $bug->component;
+    say "    VERSION: ", $bug->version || q{};
     say "     ASSIGN: ", $bug->assigned_to;
     say "     UPDATE: ", $bug->last_change_time;
     say "     CREATE: ", $bug->creation_time;

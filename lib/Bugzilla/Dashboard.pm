@@ -550,4 +550,60 @@ sub recent_comments {
     return @comments;
 }
 
+sub create_bug {
+    my ( $self, %params ) = @_;
+
+    return unless $self->_jsonrpc;
+    return unless $self->_cookie;
+
+    return unless $params{product};
+    return unless $params{component};
+    return unless $params{summary};
+    return unless defined $params{version};     # required but can be empty
+    return unless defined $params{description}; # not required but we recommend
+
+    my $client = $self->_jsonrpc;
+    my $res = try {
+        # http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Bug.html#create
+        $client->call(
+            $self->uri,
+            { # callobj
+                method => "Bug.create",
+                params => {
+                    %params,
+                },
+            },
+            $self->_cookie,
+        );
+    };
+
+    unless ($res) {
+        $self->{_error} = 'Bug.create: ' . $client->status_line;
+        return;
+    }
+
+    if ( $res->is_error ) {
+        $self->{_error} = 'Bug.comments: ';
+        given ( $res->obj->code ) {
+            $self->{_error} .= '51 (Invalid Object)'            when 51;
+            $self->{_error} .= '103 (Invalid Alias)'            when 103;
+            $self->{_error} .= '104 (Invalid Field)'            when 104;
+            $self->{_error} .= '105 (Invalid Component)'        when 105;
+            $self->{_error} .= '106 (Invalid Product)'          when 106;
+            $self->{_error} .= '107 (Invalid Summary)'          when 107;
+            $self->{_error} .= '116 (Dependency Loop)'          when 116;
+            $self->{_error} .= '120 (Group Restriction Denied)' when 120;
+            $self->{_error} .= '504 (Invalid User)'             when 504;
+            default { $self->{_error} .= $res->error_message; }
+        }
+        return;
+    }
+
+    my $result = $res->result;
+    return unless $result;
+    return unless $result->{id};
+
+    return $result->{id};
+}
+
 1;

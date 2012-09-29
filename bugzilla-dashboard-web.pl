@@ -399,7 +399,22 @@ __DATA__
             %   url_escape( encode('UTF-8', $comment->text) ),
             % );
             %
+            % my $quote_params = do {
+            %   my $description = do {
+            %     my $header = 'From Bug ' . $comment->bug_id;
+            %     my $content = $comment->text;
+            %     $content =~ s/^/> /gms;
+            %     "$header\n$content";
+            %   };
+            %   sprintf(
+            %     'blocks=%d&summary=%s&description=%s',
+            %     $comment->bug_id,
+            %     ( split "\n", $comment->text )[0],
+            %     url_escape( encode('UTF-8', $description) ),
+            %   );
+            % };
             <a href="/create-bug?<%= $create_params %>"> [C] </a>
+            <a href="/create-bug?<%= $quote_params %>"> [Q] </a>
           </span>
         </div>
         % my $comment_text = $comment->text;

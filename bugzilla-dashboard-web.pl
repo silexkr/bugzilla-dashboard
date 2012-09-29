@@ -231,19 +231,22 @@ get  '/create-bug' => sub {
 
     # Validation Rule
     my $rule = [
-        product     => ['not_blank'],
-        component   => ['not_blank'],
-        version     => ['not_blank'],
+        product   => { message => 'product is required' }   => ['not_blank'],
+        component => { message => 'component is required' } => ['not_blank'],
+        version   => { message => 'version is required' }   => ['not_blank'],
+        blocks    => { message => 'invalid blocks', require => 0 } =>
+            [ 'trim', { regex => qr/^[+\-]?\d+(,[+\-]?\d+)*$/ }, ],
     ];
 
     my %view = (
         product   => $param->{product},
         component => $param->{component},
         version   => $param->{version},
+        blocks    => $param->{blocks},
     );
 
     my $vresult = $vc->validate($param, $rule);
-    $self->stash( error => 'validation failed' ) unless $vresult->is_ok;
+    $view{error} = join '. ', values %{ $vresult->messages_to_hash } unless $vresult->is_ok;
     $self->stash(
         active => '/create-bug',
         view   => \%view,
@@ -268,21 +271,24 @@ post '/create-bug' => sub {
 
     # Validation Rule
     my $rule = [
-        product     => ['not_blank'],
-        component   => ['not_blank'],
-        version     => ['not_blank'],
-        summary     => ['not_blank'],
-        description => ['not_blank'],
+        product     => { message => 'product is required' }     => ['not_blank'],
+        component   => { message => 'component is required' }   => ['not_blank'],
+        version     => { message => 'version is required' }     => ['not_blank'],
+        summary     => { message => 'summary is required' }     => ['not_blank'],
+        description => { message => 'description is required' } => ['not_blank'],
+        blocks      => { message => 'invalid blocks', require => 0 } =>
+            [ 'trim', { regex => qr/^[+\-]?\d+(,[+\-]?\d+)*$/ }, ],
     ];
 
     my %view = (
         product   => $param->{product},
         component => $param->{component},
         version   => $param->{version},
+        blocks    => $param->{blocks},
     );
 
     my $vresult = $vc->validate($param, $rule);
-    if ($vresult->is_ok) {
+    if ( $vresult->is_ok ) {
         my $bug = $DASHBOARD->create_bug(
             product     => $param->{product},
             component   => $param->{component},
@@ -296,6 +302,30 @@ post '/create-bug' => sub {
 
             $view{summary}     = q{};
             $view{description} = q{};
+
+            #
+            # update bug dependency
+            #
+            if ( $param->{blocks} ) {
+                my %blocks = (
+                    add    => [],
+                    remove => [],
+                );
+                for ( split /,/, $param->{blocks} ) {
+                    push @{ $blocks{add} },    $1 when /^\+?(\d+)$/;
+                    push @{ $blocks{remove} }, $1 when /^\-(\d+)$/;
+                }
+
+                my $bugs_info = $DASHBOARD->update_bug(
+                    ids    => [ $bug ],
+                    blocks => \%blocks,
+                );
+
+                unless ($bugs_info) {
+                    $view{error} = $DASHBOARD->error;
+                    $view{blocks} = q{};
+                }
+            }
         }
         else {
             $view{error} = $DASHBOARD->error;
@@ -306,7 +336,7 @@ post '/create-bug' => sub {
         }
     }
     else {
-        $view{error} = 'validation failed';
+        $view{error} = join '. ', values %{ $vresult->messages_to_hash };
     }
 
     $self->stash(
@@ -358,6 +388,34 @@ __DATA__
               <%= $creator %>
             </a>
           </span>
+          -
+          <span>
+            % use Mojo::Util qw(url_escape encode);
+            %
+            % my $create_params = sprintf(
+            %   'blocks=%d&summary=%s&description=%s',
+            %   $comment->bug_id,
+            %   ( split "\n", $comment->text )[0],
+            %   url_escape( encode('UTF-8', $comment->text) ),
+            % );
+            %
+            % my $quote_params = do {
+            %   my $description = do {
+            %     my $header = 'From Bug ' . $comment->bug_id;
+            %     my $content = $comment->text;
+            %     $content =~ s/^/> /gms;
+            %     "$header\n$content";
+            %   };
+            %   sprintf(
+            %     'blocks=%d&summary=%s&description=%s',
+            %     $comment->bug_id,
+            %     ( split "\n", $comment->text )[0],
+            %     url_escape( encode('UTF-8', $description) ),
+            %   );
+            % };
+            <a href="/create-bug?<%= $create_params %>"> [C] </a>
+            <a href="/create-bug?<%= $quote_params %>"> [Q] </a>
+          </span>
         </div>
         % my $comment_text = $comment->text;
         % $comment_text
@@ -375,7 +433,8 @@ __DATA__
         %
         %# using url regexp
         %# http://blog.mattheworiordan.com/post/13174566389/url-regular-expression-for-links-with-or-without-the
-        % my $uri_regexp = qr<((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)>;
+        % my $sharp = chr 0x23;
+        % my $uri_regexp = qr<((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w\-_]*)?\??(?:[-\+=&;%@.\w_]*)$sharp?(?:[.!/\w]*))?)>;
         %
         %# using email regexp
         % my $email_regexp = qr<[A-Za-z0-9._%-]+\@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}>;
@@ -473,7 +532,7 @@ __DATA__
       <th>제품</th>
       <th>중요도</th>
       <th>담당자</th>
-      <th>버그</th>
+      <th colspan="2">버그</th>
       <th>변경시간</th>
       <th>상태</th>
       <th>해결</th>
@@ -508,6 +567,15 @@ __DATA__
         <a href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $bug->id %>">
           B<%= $bug->id %> - <%= $bug->summary %>
         </a>
+      </td>
+      <td>
+        % my $create_params = sprintf(
+        %   'product=%s&component=%s&blocks=%d',
+        %   $bug->product,
+        %   $bug->component,
+        %   $bug->id,
+        % );
+        <a href="/create-bug?<%= $create_params %>"> [C] </a>
       </td>
       <td>
         % my $user = session 'user';
@@ -550,6 +618,14 @@ __DATA__
     <div class="control-group">
       <label class="control-label" for="description">Description</label>
       <div class="controls"> <textarea rows="20" class="span6" id="description" name="description"></textarea> </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="blocks">Blocks</label>
+      <div class="controls">
+        <input type="text" class="" id="blocks" name="blocks">
+        <span class="help-inline">(Optional)</span>
+      </div>
     </div>
 
     <input type="hidden" id="product" name="product">

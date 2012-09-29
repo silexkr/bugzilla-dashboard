@@ -405,7 +405,8 @@ __DATA__
         %
         %# using url regexp
         %# http://blog.mattheworiordan.com/post/13174566389/url-regular-expression-for-links-with-or-without-the
-        % my $uri_regexp = qr<((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)>;
+        % my $sharp = chr 0x23;
+        % my $uri_regexp = qr<((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w\-_]*)?\??(?:[-\+=&;%@.\w_]*)$sharp?(?:[.!/\w]*))?)>;
         %
         %# using email regexp
         % my $email_regexp = qr<[A-Za-z0-9._%-]+\@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}>;

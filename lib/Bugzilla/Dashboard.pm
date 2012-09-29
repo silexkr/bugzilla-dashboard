@@ -606,4 +606,62 @@ sub create_bug {
     return $result->{id};
 }
 
+sub update_bug {
+    my ( $self, %params ) = @_;
+
+    return unless $self->_jsonrpc;
+    return unless $self->_cookie;
+
+    $self->{_error} = 'Bug.update: ids is needed', return unless $params{ids};
+
+    my $client = $self->_jsonrpc;
+    my $res = try {
+        # http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Bug.html#update
+        $client->call(
+            $self->uri,
+            { # callobj
+                method => "Bug.update",
+                params => {
+                    %params,
+                },
+            },
+            $self->_cookie,
+        );
+    };
+
+    unless ($res) {
+        $self->{_error} = 'Bug.update ' . $client->status_line;
+        return;
+    }
+
+    if ( $res->is_error ) {
+        $self->{_error} = 'Bug.comments: ';
+        given ( $res->obj->code ) {
+            $self->{_error} .= '50 (Empty Field)'                when 50;
+            $self->{_error} .= '52 (Input Not A Number)'         when 52;
+            $self->{_error} .= '54 (Number Too Large)'           when 54;
+            $self->{_error} .= '55 (Number Too Small)'           when 55;
+            $self->{_error} .= '56 (Bad Date/Time)'              when 56;
+            $self->{_error} .= '112 (See Also Invalid)'          when 112;
+            $self->{_error} .= '115 (Permission Denied)'         when 115;
+            $self->{_error} .= '116 (Dependency Loop)'           when 116;
+            $self->{_error} .= '117 (Invalid Comment ID)'        when 117;
+            $self->{_error} .= '118 (Duplicate Loop)'            when 118;
+            $self->{_error} .= '119 (dupe_of Required)'          when 119;
+            $self->{_error} .= '120 (Group Add/Remove Denied)'   when 120;
+            $self->{_error} .= '121 (Resolution Required)'       when 121;
+            $self->{_error} .= '122 (Resolution On Open Status)' when 122;
+            $self->{_error} .= '123 (Invalid Status Transition)' when 123;
+            default { $self->{_error} .= $res->error_message; }
+        }
+        return;
+    }
+
+    my $result = $res->result;
+    $self->{_error} = 'Bug.update failed by unknwon reason', return unless $result;
+    $self->{_error} = 'Bug.update failed by unknwon reason', return unless $result->{bugs};
+
+    return $result->{bugs};
+}
+
 1;

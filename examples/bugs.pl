@@ -40,6 +40,7 @@ for my $bug (@bugs) {
     say "    PRODUCT: ", $bug->product;
     say "  COMPONENT: ", $bug->component;
     say "    VERSION: ", $bug->version || q{};
+    say "   PRIORITY: ", $bug->priority;
     say "     ASSIGN: ", $bug->assigned_to;
     say "     UPDATE: ", $bug->last_change_time;
     say "     CREATE: ", $bug->creation_time;

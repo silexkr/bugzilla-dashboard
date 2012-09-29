@@ -388,6 +388,19 @@ __DATA__
               <%= $creator %>
             </a>
           </span>
+          -
+          <span>
+            % use Mojo::Util qw(url_escape encode);
+            %
+            % my $create_params = sprintf(
+            %   'blocks=%d&summary=%s&description=%s',
+            %   $comment->bug_id,
+            %   ( split "\n", $comment->text )[0],
+            %   url_escape( encode('UTF-8', $comment->text) ),
+            % );
+            %
+            <a href="/create-bug?<%= $create_params %>"> [C] </a>
+          </span>
         </div>
         % my $comment_text = $comment->text;
         % $comment_text

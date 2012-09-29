@@ -177,7 +177,17 @@ any '/mybugs' => sub {
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
         my @mybugs = $DASHBOARD->mybugs($param->{user});
-        @mybugs = reverse sort { $a->last_change_time->epoch cmp $b->last_change_time->epoch } @mybugs;
+        my %priority_table = (
+            Highest => 5,
+            High    => 4,
+            Normal  => 3,
+            Low     => 2,
+            Lowest  => 1,
+            '---'   => 0,
+        );
+        @mybugs = reverse sort {
+            $priority_table{ $a->priority } cmp $priority_table{ $b->priority }
+        } @mybugs;
         $self->stash(
             view   => { bug => \@mybugs },
             active => '/mybugs',

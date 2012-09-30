@@ -25,7 +25,12 @@ my $DASHBOARD = Bugzilla::Dashboard->new( %{ $config->{connect} } );
 
 my $vc = Validator::Custom->new;
 
-get '/' => 'login';
+get '/' => sub {
+    my $self = shift;
+
+    $self->redirect_to( 'login' ), return unless $self->session('user');
+    $self->redirect_to( 'mybugs' );
+};
 
 get '/logout' => sub {
     my $self = shift;

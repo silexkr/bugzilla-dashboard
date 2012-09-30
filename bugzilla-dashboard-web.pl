@@ -19,46 +19,33 @@ my %DEFAULT_STASH = (
     %$config,
 );
 app->defaults(%DEFAULT_STASH);
-$config = app->defaults;
 
-my $DASHBOARD = Bugzilla::Dashboard->new( %{ $config->{connect} } );
+my $DASHBOARD = Bugzilla::Dashboard->new( %{ app->defaults->{connect} } );
 
 my $vc = Validator::Custom->new;
 
-get '/' => sub {
+helper check_login => sub {
     my $self = shift;
 
-    $self->redirect_to( 'login' ), return unless $self->session('user');
-    $self->redirect_to( 'mybugs' );
+    if ( $self->session('user') ) {
+        my $users = $DASHBOARD->get_user(
+            names => [ $self->session('user')->{email} ],
+        );
+        return 1 if $users;
+    }
+
+    return;
 };
 
-get '/logout' => sub {
-    my $self = shift;
+helper login => sub {
+    my ( $self, $username, $password, $remember ) = @_;
 
-    undef $DASHBOARD;
-    $self->session(expires => 1);
-    $self->redirect_to( '/login' );
-};
+    return unless $username;
+    return unless $password;
+    return unless $self->app->config->{users};
+    return unless $self->app->config->{users}{data};
 
-get  '/login' => sub {
-    my $self = shift;
-
-    $self->redirect_to( '/mybugs' ) if $self->session('user');
-};
-
-post '/login' => sub {
-    my $self = shift;
-
-    my $username = $self->param('username') // q{};
-    my $password = $self->param('password') // q{};
-    my $remember = $self->param('remember') // q{};
-    my $email    = $self->param('username') // q{};
-
-    $self->render( 'login' ), return unless $username;
-    $self->render( 'login' ), return unless $password;
-    $self->render( 'login' ), return unless $self->app->config->{users};
-    $self->render( 'login' ), return unless $self->app->config->{users}{data};
-
+    my $email = $username;
     if ($username =~ /\@/) {
         for my $_username ( keys %{ $self->app->config->{users}{data} } ) {
             if ( $email eq $self->app->config->{users}{data}{$_username}{email} ) {
@@ -72,40 +59,61 @@ post '/login' => sub {
     }
 
     my $dashboard = Bugzilla::Dashboard->new(
-        %{ $config->{connect} },
+        %{ $self->app->config->{connect} },
         user     => $email,
-        password => $self->param('password'),
+        password => $password,
+        remember => $remember,
     );
+
     unless ( $dashboard->connect ) {
-        $self->app->log->debug("cannot connect to bugzilla dashboard");
-        $self->redirect_to( '/login' );
+        $self->app->log->warn(
+            "cannot connect to bugzilla dashboard: " . $dashboard->error
+        );
         return;
     }
 
-    if ($dashboard) {
-        $DASHBOARD = $dashboard;
-        $self->session(
-            user         => $self->app->config->{users}{data}{$username},
-            bugzilla_uri => dirname( $dashboard->uri ),
-        );
-        $self->app->log->debug("login success");
-        $self->redirect_to( 'mybugs' );
-        return;
-    }
-    else {
-        $self->app->log->debug("login failed");
-        $self->render( 'login' );
-    }
+    $DASHBOARD = $dashboard;
+    $self->app->config->{users}{data}{$username}{password} = $password;
+    $self->session(
+        user         => $self->app->config->{users}{data}{$username},
+        bugzilla_uri => dirname( $dashboard->uri ),
+    );
+
+    $self->app->log->debug("login success");
+
+    return 1;
+};
+
+any '/' => sub {
+    my $self = shift;
+
+    return $self->redirect_to('/mybugs') if $self->check_login;
+
+    my $username = $self->param('username') // q{};
+    my $password = $self->param('password') // q{};
+    my $remember = $self->param('remember') // q{};
+
+    return $self->render unless $self->login($username, $password, $remember);
+
+    $self->redirect_to('/mybugs');
+} => 'login';
+
+get '/logout' => sub {
+    my $self = shift;
+
+    undef $DASHBOARD;
+    $self->session(expires => 1);
+    $self->redirect_to('/');
 };
 
 any '/recent-comments' => sub {
     my $self = shift;
 
-    $self->redirect_to( 'login' ), return unless $self->session('user');
+    return $self->redirect_to('/') unless $self->check_login;
 
     my $param = $self->req->params->to_hash;
     $param->{date}  ||= DateTime->now->add(days => -1)->ymd;
-    $param->{limit} ||= $config->{recent_comments_limit};
+    $param->{limit} ||= $self->app->config->{recent_comments_limit};
 
     # Validation Rule
     my $rule = [
@@ -142,10 +150,10 @@ any '/recent-comments' => sub {
 any '/recent-attachments' => sub {
     my $self = shift;
 
-    $self->redirect_to( 'login' ), return unless $self->session('user');
+    return $self->redirect_to('/') unless $self->check_login;
 
     my $param = $self->req->params->to_hash;
-    $param->{limit} ||= $config->{recent_attachments_limit};
+    $param->{limit} ||= $self->app->config->{recent_attachments_limit};
 
     # Validation Rule
     my $rule = [ limit => [ 'int' ] ];
@@ -175,7 +183,7 @@ any '/recent-attachments' => sub {
 any '/mybugs' => sub {
     my $self = shift;
 
-    $self->redirect_to( 'login' ), return unless $self->session('user');
+    return $self->redirect_to('login') unless $self->check_login;
 
     my $param = $self->req->params->to_hash;
     $param->{user} ||= $self->session('user')->{email};
@@ -219,15 +227,15 @@ any '/mybugs' => sub {
 any '/search' => sub {
     my $self = shift;
 
-    $self->redirect_to( 'login' ), return unless $self->session('user');
+    return $self->redirect_to('login') unless $self->check_login;
 
     my $param = $self->req->params->to_hash;
 
     my %search_params = $DASHBOARD->generate_query_params( $param->{query} );
-    my @mybugs = $DASHBOARD->search(%search_params);
-    @mybugs = reverse sort { $a->last_change_time->epoch cmp $b->last_change_time->epoch } @mybugs;
+    my @bugs = $DASHBOARD->search(%search_params);
+    @bugs = reverse sort { $a->last_change_time->epoch cmp $b->last_change_time->epoch } @bugs;
     $self->stash(
-        view   => { bug => \@mybugs },
+        view   => { bug => \@bugs },
         active => '/search',
     );
 
@@ -241,12 +249,12 @@ any '/search' => sub {
 get  '/create-bug' => sub {
     my $self = shift;
 
-    $self->redirect_to( 'login' ), return unless $self->session('user');
+    return $self->redirect_to('login') unless $self->check_login;
 
     my $param = $self->req->params->to_hash;
-    $param->{product}   ||= $config->{default_product}   || q{};
-    $param->{component} ||= $config->{default_component} || q{};
-    $param->{version}   ||= $config->{default_version}   || q{};
+    $param->{product}   ||= $self->app->config->{default_product}   || q{};
+    $param->{component} ||= $self->app->config->{default_component} || q{};
+    $param->{version}   ||= $self->app->config->{default_version}   || q{};
 
     # Validation Rule
     my $rule = [
@@ -281,12 +289,12 @@ get  '/create-bug' => sub {
 post '/create-bug' => sub {
     my $self = shift;
 
-    $self->redirect_to( 'login' ), return unless $self->session('user');
+    return $self->redirect_to('login') unless $self->check_login;
 
     my $param = $self->req->params->to_hash;
-    $param->{product}   ||= $config->{default_product};
-    $param->{component} ||= $config->{default_component};
-    $param->{version}   ||= $config->{default_version};
+    $param->{product}   ||= $self->app->config->{default_product};
+    $param->{component} ||= $self->app->config->{default_component};
+    $param->{version}   ||= $self->app->config->{default_version};
 
     # Validation Rule
     my $rule = [
@@ -349,9 +357,9 @@ post '/create-bug' => sub {
         else {
             $view{error} = $DASHBOARD->error;
 
-            $view{product}   = $config->{default_product};
-            $view{component} = $config->{default_component};
-            $view{version}   = $config->{default_version};
+            $view{product}   = $self->app->config->{default_product};
+            $view{component} = $self->app->config->{default_component};
+            $view{version}   = $self->app->config->{default_version};
         }
     }
     else {
@@ -851,7 +859,7 @@ __DATA__
                 </ul>
             % }
             % else {
-                <a href="/login"> <i class="icon-lock"></i> Login </a>
+                <a href="/"> <i class="icon-lock"></i> Login </a>
             % }
           </li>
         </ul>
@@ -949,7 +957,7 @@ __DATA__
 
 <div id="login-content" class="clearfix">
 
-  <form action="/login" method="post">
+  <form action="/" method="post">
     <fieldset>
       <div class="control-group">
         <label class="control-label" for="username">Username</label>

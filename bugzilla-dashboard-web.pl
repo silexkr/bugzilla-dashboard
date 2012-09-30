@@ -73,6 +73,66 @@ helper login => sub {
     return 1;
 };
 
+helper linkify => sub {
+    my ( $self, $text, $params ) = @_;
+
+    return unless $text;
+
+    use Mojo::Util qw(html_escape);
+
+    my $result = html_escape($text);
+
+    my $uri   = $self->session('bugzilla_uri');
+    my $alink = qq{$uri/attachment.cgi?id=%d};
+    my $blink = qq{$uri/show_bug.cgi?id=%d};
+    my $clink = qq{$uri/show_bug.cgi?id=%d#c%d};
+
+    # using url regexp
+    # http://blog.mattheworiordan.com/post/13174566389/url-regular-expression-for-links-with-or-without-the
+    my $sharp = chr 0x23;
+    my $uri_regexp = qr<((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w\-_]*)?\??(?:[-\+=&;%@.\w_]*)$sharp?(?:[.!/\w]*))?)>;
+
+    # using email regexp
+    my $email_regexp = qr<[A-Za-z0-9._%-]+\@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}>;
+
+    $result =~ s{($uri_regexp)}{<a href="$1">$1</a>}g;
+    $result =~ s{($email_regexp)}{<a href="mailto:$1">$1</a>}g;
+
+    $result =~ s{
+        (attachment) \s+ (\d+)
+    }{
+        my $link = sprintf $alink, $2;
+        qq|<a href="$link">$&</a>|;
+    }giex;
+
+    $result =~ s{
+        (Bug) \s+ (\d+)
+        (?! \s+ Comment | \d )
+    }{
+        my $link = sprintf $blink, $2;
+        qq|<a href="$link">$&</a>|;
+    }giex;
+
+    if ($params->{bug_id}) {
+        my $bid = $params->{bug_id};
+        $result =~ s{(comment) #(\d+)}{
+            my $link = sprintf $clink, $bid, $2;
+            qq|<a href="$link">$&</a>|;
+        }gie;
+    }
+
+    $result =~ s{
+        (Bug) \s+ (\d+)
+        \s+
+        (Comment) \s+ (\d+)
+    }{
+        my $link = sprintf $clink, $2, $4;
+        qq|<a href="$link">$&</a>|;
+    }giex;
+
+    return $result;
+};
+
 any '/' => sub {
     my $self = shift;
 
@@ -440,27 +500,7 @@ __DATA__
         %   ? substr($comment_text, 0, $config->{comments_string_length}) .  '...'
         %   : $comment_text
         %   ;
-        %
-        % use Mojo::Util qw(html_escape);
-        % $comment_text = html_escape($comment_text);
-        %
-        % my $uri   = session 'bugzilla_uri';
-        % my $alink = sprintf qq{$uri/attachment.cgi};
-        % my $blink = sprintf qq{$uri/show_bug.cgi?id=%d}, $comment->bug_id;
-        %
-        %# using url regexp
-        %# http://blog.mattheworiordan.com/post/13174566389/url-regular-expression-for-links-with-or-without-the
-        % my $sharp = chr 0x23;
-        % my $uri_regexp = qr<((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w\-_]*)?\??(?:[-\+=&;%@.\w_]*)$sharp?(?:[.!/\w]*))?)>;
-        %
-        %# using email regexp
-        % my $email_regexp = qr<[A-Za-z0-9._%-]+\@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}>;
-        %
-        % $comment_text =~ s{($uri_regexp)}{<a href="$1">$1</a>}g;
-        % $comment_text =~ s{($email_regexp)}{<a href="mailto:$1">$1</a>}g;
-        % $comment_text =~ s{(attachment) (\d+)}{<a href="$alink?id=$2">$1 $2</a>}g;
-        % $comment_text =~ s{(comment) #(\d+)}{<a href="$blink#c$2">$1 #$2</a>}g;
-        %
+        % $comment_text = linkify $comment_text, { bug_id => $comment->bug_id };
         <pre><%== $comment_text %></pre>
       </td>
     </tr>
@@ -686,10 +726,10 @@ __DATA__
 
             <div class="widget">
               % if ($view->{error}) {
-              <div class="alert alert-error"><%= $view->{error} %></div>
+              <div class="alert alert-error"><%== $view->{error} %></div>
               % }
               % if ($view->{success}) {
-              <div class="alert alert-success"><%= $view->{success} %></div>
+              <div class="alert alert-success"><%== linkify $view->{success} %></div>
               % }
 
               <%= content %>

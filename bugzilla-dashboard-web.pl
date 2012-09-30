@@ -726,10 +726,10 @@ __DATA__
 
             <div class="widget">
               % if ($view->{error}) {
-              <div class="alert alert-error"><%= $view->{error} %></div>
+              <div class="alert alert-error"><%== $view->{error} %></div>
               % }
               % if ($view->{success}) {
-              <div class="alert alert-success"><%= $view->{success} %></div>
+              <div class="alert alert-success"><%== linkify $view->{success} %></div>
               % }
 
               <%= content %>

@@ -62,7 +62,7 @@ helper login => sub {
         %{ $self->app->config->{connect} },
         user     => $email,
         password => $password,
-        remember => $remember,
+        remember => 1,
     );
 
     unless ( $dashboard->connect ) {
@@ -74,9 +74,11 @@ helper login => sub {
 
     $DASHBOARD = $dashboard;
     $self->app->config->{users}{data}{$username}{password} = $password;
+
     $self->session(
         user         => $self->app->config->{users}{data}{$username},
         bugzilla_uri => dirname( $dashboard->uri ),
+        expiration   => $remember ?  $self->app->config->{expire}{remember} : $self->app->config->{expire}{default},
     );
 
     $self->app->log->debug("login success");
@@ -87,7 +89,7 @@ helper login => sub {
 any '/' => sub {
     my $self = shift;
 
-    return $self->redirect_to('/mybugs') if $self->check_login;
+    return $self->redirect_to('/mybugs') if $self->session('user');
 
     my $username = $self->param('username') // q{};
     my $password = $self->param('password') // q{};
@@ -109,7 +111,7 @@ get '/logout' => sub {
 any '/recent-comments' => sub {
     my $self = shift;
 
-    return $self->redirect_to('/') unless $self->check_login;
+    return $self->redirect_to('/') unless $self->session('user');
 
     my $param = $self->req->params->to_hash;
     $param->{date}  ||= DateTime->now->add(days => -1)->ymd;
@@ -150,7 +152,7 @@ any '/recent-comments' => sub {
 any '/recent-attachments' => sub {
     my $self = shift;
 
-    return $self->redirect_to('/') unless $self->check_login;
+    return $self->redirect_to('/') unless $self->session('user');
 
     my $param = $self->req->params->to_hash;
     $param->{limit} ||= $self->app->config->{recent_attachments_limit};
@@ -183,7 +185,7 @@ any '/recent-attachments' => sub {
 any '/mybugs' => sub {
     my $self = shift;
 
-    return $self->redirect_to('login') unless $self->check_login;
+    return $self->redirect_to('login') unless $self->session('user');
 
     my $param = $self->req->params->to_hash;
     $param->{user} ||= $self->session('user')->{email};
@@ -227,7 +229,7 @@ any '/mybugs' => sub {
 any '/search' => sub {
     my $self = shift;
 
-    return $self->redirect_to('login') unless $self->check_login;
+    return $self->redirect_to('login') unless $self->session('user');
 
     my $param = $self->req->params->to_hash;
 
@@ -249,7 +251,7 @@ any '/search' => sub {
 get  '/create-bug' => sub {
     my $self = shift;
 
-    return $self->redirect_to('login') unless $self->check_login;
+    return $self->redirect_to('login') unless $self->session('user');
 
     my $param = $self->req->params->to_hash;
     $param->{product}   ||= $self->app->config->{default_product}   || q{};
@@ -289,7 +291,7 @@ get  '/create-bug' => sub {
 post '/create-bug' => sub {
     my $self = shift;
 
-    return $self->redirect_to('login') unless $self->check_login;
+    return $self->redirect_to('login') unless $self->session('user');
 
     my $param = $self->req->params->to_hash;
     $param->{product}   ||= $self->app->config->{default_product};

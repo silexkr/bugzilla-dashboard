@@ -21,8 +21,7 @@ my %DEFAULT_STASH = (
 app->defaults(%DEFAULT_STASH);
 $config = app->defaults;
 
-my $DASHBOARD = Bugzilla::Dashboard->new( %{ $config->{connect} } )
-    or die "cannot connect to bugzilla dashboard\n";
+my $DASHBOARD = Bugzilla::Dashboard->new( %{ $config->{connect} } );
 
 my $vc = Validator::Custom->new;
 
@@ -72,6 +71,10 @@ post '/login' => sub {
         user     => $email,
         password => $self->param('password'),
     );
+    unless ( $dashboard->connect ) {
+        $self->app->log->debug("cannot connect to bugzilla dashboard");
+        $self->redirect_to( '/login' );
+    }
 
     if ($dashboard) {
         $DASHBOARD = $dashboard;

@@ -25,6 +25,7 @@ my %connect_info;
 $connect_info{user}     = $opt->user     if $opt->user;
 $connect_info{password} = $opt->password if $opt->password;
 $connect_info{uri}      = $opt->uri      if $opt->uri;
+$connect_info{connect}  = 1;
 
 my @ids = @ARGV;
 print($usage->text), exit unless @ids;

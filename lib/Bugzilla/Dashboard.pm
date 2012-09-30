@@ -23,6 +23,7 @@ sub new {
         uri      => $ENV{BUGZILLA_DASHBOARD_URI},
         user     => $ENV{BUGZILLA_DASHBOARD_USER},
         password => $ENV{BUGZILLA_DASHBOARD_PASSWORD},
+        remember => 0,
         connect  => 0,
         %params,
         _cookie  => HTTP::Cookies->new( {} ),
@@ -67,6 +68,11 @@ sub password {
     return $self->{password};
 }
 
+sub remember {
+    my $self = shift;
+    return $self->{remember};
+}
+
 sub connect {
     my $self = shift;
 
@@ -82,6 +88,7 @@ sub connect {
                 params => {
                     login    => $self->user,
                     password => $self->password,
+                    remember => $self->remember,
                 }
             }
         );

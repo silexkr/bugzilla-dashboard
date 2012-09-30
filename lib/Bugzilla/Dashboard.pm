@@ -23,13 +23,17 @@ sub new {
         uri      => $ENV{BUGZILLA_DASHBOARD_URI},
         user     => $ENV{BUGZILLA_DASHBOARD_USER},
         password => $ENV{BUGZILLA_DASHBOARD_PASSWORD},
+        connect  => 0,
         %params,
         _cookie  => HTTP::Cookies->new( {} ),
         _error   => q{},
         _jsonrpc => JSON::RPC::Legacy::Client->new,
     }, $class;
 
-    $self->connect or warn($self->error), return;
+    if ( $self->{connect} ) {
+        $self->connect or warn($self->error);
+        return;
+    }
 
     return $self;
 }

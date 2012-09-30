@@ -23,6 +23,7 @@ sub new {
         uri      => $ENV{BUGZILLA_DASHBOARD_URI},
         user     => $ENV{BUGZILLA_DASHBOARD_USER},
         password => $ENV{BUGZILLA_DASHBOARD_PASSWORD},
+        remember => 0,
         connect  => 0,
         %params,
         _cookie  => HTTP::Cookies->new( {} ),
@@ -32,7 +33,6 @@ sub new {
 
     if ( $self->{connect} ) {
         $self->connect or warn($self->error);
-        return;
     }
 
     return $self;
@@ -68,11 +68,16 @@ sub password {
     return $self->{password};
 }
 
+sub remember {
+    my $self = shift;
+    return $self->{remember};
+}
+
 sub connect {
     my $self = shift;
 
-    return unless $self->_jsonrpc;
-    return unless $self->_cookie;
+    $self->{_error} = 'invalid json rpc object', return unless $self->_jsonrpc;
+    $self->{_error} = 'invalid cookie',          return unless $self->_cookie;
 
     my $client = $self->_jsonrpc;
     my $res = try {
@@ -83,6 +88,7 @@ sub connect {
                 params => {
                     login    => $self->user,
                     password => $self->password,
+                    remember => $self->remember,
                 }
             }
         );
@@ -319,10 +325,10 @@ sub bugs {
 sub mybugs {
     my ( $self, $user ) = @_;
 
-    my @bugs = $self->search(
-        assigned_to => [ $user || $self->user ],
-        status      => [ qw( UNCONFIRMED CONFIRMED IN_PROGRESS ) ],
+    my %search_params = $self->generate_query_params(
+        sprintf( '@%s OPEN', $user || $self->user )
     );
+    my @bugs = $self->search( %search_params );
 
     return @bugs;
 }
@@ -666,6 +672,63 @@ sub update_bug {
     $self->{_error} = 'Bug.update failed by unknwon reason', return unless $result->{bugs};
 
     return $result->{bugs};
+}
+
+sub get_user {
+    my ( $self, %params ) = @_;
+
+    $self->{_error} = 'invalid json rpc object', return unless $self->_jsonrpc;
+    $self->{_error} = 'invalid cookie',          return unless $self->_cookie;
+
+    my $client = $self->_jsonrpc;
+    my $res = try {
+        $client->call(
+            $self->uri,
+            { # callobj
+                method => "User.get",
+                params => {
+                    include_fields => [qw(
+                        id
+                        real_name
+                        email
+                        name
+                        can_login
+                        email_enabled
+                        login_denied_text
+                        groups
+                        saved_searches
+                        saved_reports
+                    )],
+                    %params,
+                },
+            },
+            $self->_cookie,
+        );
+    };
+
+    unless ($res) {
+        $self->{_error} = 'User.get: ' . $client->status_line;
+        return;
+    }
+
+    if ( $res->is_error ) {
+        $self->{_error} = 'User.get: ';
+        given ( $res->obj->code ) {
+            $self->{_error} .= '51 (Bad Login Name or Group Name)'               when 51;
+            $self->{_error} .= '304 (Authorization Required)'                    when 304;
+            $self->{_error} .= '505 (User Access By Id or User-Matching Denied)' when 505;
+            default { $self->{_error} .= $res->error_message; }
+        }
+        return;
+    }
+
+    my $result = $res->result;
+    $self->{_error} = 'User.get failed by unknwon reason', return unless $result;
+    $self->{_error} = 'User.get failed by unknwon reason', return unless $result->{users};
+
+    my $users = $result->{users};
+
+    return $users;
 }
 
 1;

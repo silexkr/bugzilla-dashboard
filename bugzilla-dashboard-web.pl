@@ -367,6 +367,7 @@ post '/create-bug' => sub {
     );
 };
 
+app->secret( app->defaults->{secret} );
 app->start;
 
 __DATA__

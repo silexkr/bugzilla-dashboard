@@ -24,19 +24,6 @@ my $DASHBOARD = Bugzilla::Dashboard->new( %{ app->defaults->{connect} } );
 
 my $vc = Validator::Custom->new;
 
-helper check_login => sub {
-    my $self = shift;
-
-    if ( $self->session('user') ) {
-        my $users = $DASHBOARD->get_user(
-            names => [ $self->session('user')->{email} ],
-        );
-        return 1 if $users;
-    }
-
-    return;
-};
-
 helper login => sub {
     my ( $self, $username, $password, $remember ) = @_;
 

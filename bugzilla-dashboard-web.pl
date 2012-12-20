@@ -523,7 +523,7 @@ __DATA__
 @@ recent-attachments.html.ep
 % layout 'default', csses => [], jses => [];
 % title '최근 추가된 첨부파일';
-<form method="post" enctype="application/x-www-form-urlencoded">
+<form method="post" enctype="application/x-www-form-urlencoded" class="form-inline">
   <input class="input-medium" type="text" name="limit" placeholder="갯수" />
   <input class="btn btn-primary" type="submit" value="찾기" />
 </form>

@@ -512,7 +512,7 @@ __DATA__
 @@ recent-comments.html.ep
 % layout 'default', csses => [], jses => [];
 % title '최근 변경 이력의 제공';
-<form method="post" enctype="application/x-www-form-urlencoded">
+<form method="post" enctype="application/x-www-form-urlencoded" class="form-inline">
   <input class="input-medium" type="text" name="date" placeholder="검색을 시작할 날짜" />
   <input class="input-medium" type="text" name="limit" placeholder="갯수" />
   <input class="btn btn-primary" type="submit" value="찾기" />

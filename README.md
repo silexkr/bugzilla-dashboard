@@ -29,9 +29,10 @@ Bugzilla::Dashboard
     default_component => 'Undef',
     default_version   => 'unspecified',
 
-
-환경 변수
+환경 변수 및 사용자 설정
 ----------
+
+### 환경 변수 ###
 
 다음 세 개의 환경 변수를 사용합니다.
 
@@ -39,6 +40,24 @@ Bugzilla::Dashboard
 - `BUGZILLA_DASHBOARD_PASSOWRD`: 버그질라 로그인 비밀번호
 - `BUGZILLA_DASHBOARD_URI`: 버그질라 JSON-RPC 주소
 
+### 사용자 설정 ###
+
+로그인해서 사용할 계정을 `bugzilla-dashboard-web.conf` 파일에 `%users`
+섹션에 추가 해줘야 합니다.
+
+```conf
+my %users = (
+  data => {
+    aanoaa => {  # aanoaa@gmail.com 에서 aanoaa
+      name      => 'Hyungsuk Hong',
+      email     => 'aanoaa@gmail.com',
+      role      => 'Member',
+      avatar    => 'https://secure.gravatar.com/avatar/9d7dc1d8ecf99bb4ecaacc35539604a1',
+      time_zone => 'Asia/Seoul',
+    }
+  }
+);
+```
 
 실행
 -----

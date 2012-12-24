@@ -757,7 +757,7 @@ __DATA__
 <!-- Le styles -->
 <link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/bootstrap/css/bootstrap.min.css">
 <link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/bootstrap/css/bootstrap-responsive.min.css">
-<link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/bootstrap/css/bootstrap-datepicker.css">
+<link type="text/css" rel="stylesheet" href="/css/bootstrap-datepicker.css">
 <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
 <link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/font-awesome/font-awesome.css">
 <link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/css/style.css">
@@ -781,7 +781,7 @@ __DATA__
 <!-- Placed at the end of the document so the pages load faster -->
 <script type="text/javascript" src="/js/jquery-1.8.2.min.js"></script>
 <script type="text/javascript" src="/themes/<%= $theme %>/bootstrap/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="/themes/<%= $theme %>/bootstrap/js/bootstrap-datepicker.js"></script>
+<script type="text/javascript" src="/js/bootstrap-datepicker.js"></script>
 % for my $js (@$jses) {
   <script type="text/javascript" src="/js/<%= $js %>"></script>
 % }

@@ -512,8 +512,8 @@ __DATA__
 @@ recent-comments.html.ep
 % layout 'default', csses => [], jses => [];
 % title '최근 변경 이력의 제공';
-<form method="post" enctype="application/x-www-form-urlencoded">
-  <input class="input-medium" type="text" name="date" placeholder="검색을 시작할 날짜" />
+<form method="post" enctype="application/x-www-form-urlencoded" class="form-inline">
+  <input class="input-medium datepicker" type="text" name="date" placeholder="검색을 시작할 날짜" />
   <input class="input-medium" type="text" name="limit" placeholder="갯수" />
   <input class="btn btn-primary" type="submit" value="찾기" />
 </form>
@@ -523,7 +523,7 @@ __DATA__
 @@ recent-attachments.html.ep
 % layout 'default', csses => [], jses => [];
 % title '최근 추가된 첨부파일';
-<form method="post" enctype="application/x-www-form-urlencoded">
+<form method="post" enctype="application/x-www-form-urlencoded" class="form-inline">
   <input class="input-medium" type="text" name="limit" placeholder="갯수" />
   <input class="btn btn-primary" type="submit" value="찾기" />
 </form>
@@ -757,6 +757,7 @@ __DATA__
 <!-- Le styles -->
 <link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/bootstrap/css/bootstrap.min.css">
 <link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/bootstrap/css/bootstrap-responsive.min.css">
+<link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/bootstrap/css/bootstrap-datepicker.css">
 <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
 <link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/font-awesome/font-awesome.css">
 <link type="text/css" rel="stylesheet" href="/themes/<%= $theme %>/css/style.css">
@@ -780,9 +781,17 @@ __DATA__
 <!-- Placed at the end of the document so the pages load faster -->
 <script type="text/javascript" src="/js/jquery-1.8.2.min.js"></script>
 <script type="text/javascript" src="/themes/<%= $theme %>/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/themes/<%= $theme %>/bootstrap/js/bootstrap-datepicker.js"></script>
 % for my $js (@$jses) {
   <script type="text/javascript" src="/js/<%= $js %>"></script>
 % }
+<script>
+  $(document).ready(function () {
+    $('.datepicker').datepicker({
+      format: 'yyyy-mm-dd'
+    });
+  });
+</script>
 
 % if ($google_analytics) {
   <!-- google analytics -->

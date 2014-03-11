@@ -634,6 +634,7 @@ __DATA__
         %   $bug->id,
         % );
         <a class="dashboard-link-tooltip" href="/create-bug?<%= $create_params %>" data-title="버그 생성"> [C] </a>
+        <a class="dashboard-link-tooltip" href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $bug->id %>#comment" data-title="답글 달기"> [R] </a>
       </td>
       <td>
         % my $user = session 'user';

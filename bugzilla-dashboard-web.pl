@@ -490,8 +490,8 @@ __DATA__
             %     url_escape( encode('UTF-8', $description) ),
             %   );
             % };
-            <a href="/create-bug?<%= $create_params %>"> [C] </a>
-            <a href="/create-bug?<%= $quote_params %>"> [Q] </a>
+            <a href="/create-bug?<%= $create_params %>"> [버그 생성] </a>
+            <a href="/create-bug?<%= $quote_params %>"> [인용 후 버그 생성] </a>
           </span>
         </div>
         % my $comment_text = $comment->text;
@@ -632,7 +632,7 @@ __DATA__
         %   $bug->component,
         %   $bug->id,
         % );
-        <a href="/create-bug?<%= $create_params %>"> [C] </a>
+        <a href="/create-bug?<%= $create_params %>"> [버그 생성] </a>
       </td>
       <td>
         % my $user = session 'user';

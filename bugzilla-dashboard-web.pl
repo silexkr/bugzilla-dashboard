@@ -492,6 +492,7 @@ __DATA__
             % };
             <a href="/create-bug?<%= $create_params %>"> [버그 생성] </a>
             <a href="/create-bug?<%= $quote_params %>"> [인용 후 버그 생성] </a>
+            <a href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $comment->bug_id %>#comment"> [답글] </a>
           </span>
         </div>
         % my $comment_text = $comment->text;

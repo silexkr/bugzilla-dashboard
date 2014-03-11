@@ -78,9 +78,9 @@ helper linkify => sub {
 
     return unless $text;
 
-    use Mojo::Util qw(html_escape);
+    use Mojo::Util qw(xml_escape);
 
-    my $result = html_escape($text);
+    my $result = xml_escape($text);
 
     my $uri   = $self->session('bugzilla_uri');
     my $alink = qq{$uri/attachment.cgi?id=%d};

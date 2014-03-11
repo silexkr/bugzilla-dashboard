@@ -444,8 +444,8 @@ __DATA__
     % foreach my $comment (@{ $view->{comments} }) {
     <tr>
       <td>
-        <a href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $comment->bug_id %>">
-          <%= $comment->bug_id %> (<%= $comment->id %>)
+        <a href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $comment->bug_id %>#c<%= $comment->count %>">
+          B#<%= $comment->bug_id %> C#<%= $comment->count %>
         </a>
       </td>
       <td>

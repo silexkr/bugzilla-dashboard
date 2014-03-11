@@ -32,7 +32,7 @@ sub new {
     }, $class;
 
     if ( $self->{connect} ) {
-        $self->connect or warn($self->error);
+        $self->do_connect or warn($self->error);
     }
 
     return $self;
@@ -75,6 +75,11 @@ sub remember {
 
 sub connect {
     my $self = shift;
+    return $self->{connect};
+}
+
+sub do_connect {
+    my $self = shift;
 
     $self->{_error} = 'invalid json rpc object', return unless $self->_jsonrpc;
     $self->{_error} = 'invalid cookie',          return unless $self->_cookie;
@@ -110,8 +115,9 @@ sub connect {
     #
     $self->_cookie->extract_cookies( $res->obj );
     $client->ua->cookie_jar( $self->_cookie );
+    $self->{connect} = 1;
 
-    return $client;
+    return $self;
 }
 
 sub search {

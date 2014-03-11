@@ -311,7 +311,7 @@ get  '/create-bug' => sub {
         component => { message => 'component is required' } => ['not_blank'],
         version   => { message => 'version is required' }   => ['not_blank'],
         blocks    => { message => 'invalid blocks', require => 0 } =>
-            [ 'trim', { regex => qr/^[+\-]?\d+(,[+\-]?\d+)*$/ }, ],
+            [ 'trim', { regex => qr/^([+\-]?\d+(,[+\-]?\d+)*|)$/ }, ],
     ];
 
     my %view = (
@@ -353,7 +353,7 @@ post '/create-bug' => sub {
         summary     => { message => 'summary is required' }     => ['not_blank'],
         description => { message => 'description is required' } => ['not_blank'],
         blocks      => { message => 'invalid blocks', require => 0 } =>
-            [ 'trim', { regex => qr/^[+\-]?\d+(,[+\-]?\d+)*$/ }, ],
+            [ 'trim', { regex => qr/^([+\-]?\d+(,[+\-]?\d+)*|)$/ }, ],
     ];
 
     my %view = (

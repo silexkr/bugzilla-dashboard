@@ -490,9 +490,9 @@ __DATA__
             %     url_escape( encode('UTF-8', $description) ),
             %   );
             % };
-            <a href="/create-bug?<%= $create_params %>"> [버그 생성] </a>
-            <a href="/create-bug?<%= $quote_params %>"> [인용 후 버그 생성] </a>
-            <a href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $comment->bug_id %>#comment"> [답글] </a>
+            <a class="dashboard-link-tooltip" href="/create-bug?<%= $create_params %>" data-title="버그 생성"> [C] </a>
+            <a class="dashboard-link-tooltip" href="/create-bug?<%= $quote_params %>" data-title="인용 후 버그 생성"> [Q] </a>
+            <a class="dashboard-link-tooltip" href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $comment->bug_id %>#comment" data-title="답글 달기"> [R] </a>
           </span>
         </div>
         % my $comment_text = $comment->text;
@@ -633,7 +633,7 @@ __DATA__
         %   $bug->component,
         %   $bug->id,
         % );
-        <a href="/create-bug?<%= $create_params %>"> [버그 생성] </a>
+        <a class="dashboard-link-tooltip" href="/create-bug?<%= $create_params %>" data-title="버그 생성"> [C] </a>
       </td>
       <td>
         % my $user = session 'user';
@@ -791,6 +791,7 @@ __DATA__
     $('.datepicker').datepicker({
       format: 'yyyy-mm-dd'
     });
+    $('.dashboard-link-tooltip').tooltip({ placement: 'top' });
   });
 </script>
 

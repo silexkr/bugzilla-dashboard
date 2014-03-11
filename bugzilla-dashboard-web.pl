@@ -189,9 +189,9 @@ any '/recent-comments' => sub {
         );
     }
 
-    my $html = $self->render_partial('recent-comments')->to_string;
-    $self->render_text(
-        HTML::FillInForm::Lite->fill(\$html, $param),
+    my $html = $self->render( partial => 1, template => 'recent-comments' )->to_string;
+    $self->render(
+        text   => HTML::FillInForm::Lite->fill(\$html, $param),
         format => 'html',
     );
 };
@@ -222,9 +222,9 @@ any '/recent-attachments' => sub {
         );
     }
 
-    my $html = $self->render_partial('recent-attachments')->to_string;
+    my $html = $self->render( partial => 1, template => 'recent-attachments' )->to_string;
     $self->render_text(
-        HTML::FillInForm::Lite->fill(\$html, $param),
+        text   => HTML::FillInForm::Lite->fill(\$html, $param),
         format => 'html',
     );
 };
@@ -266,9 +266,9 @@ any '/mybugs' => sub {
         );
     }
 
-    my $html = $self->render_partial('mybugs')->to_string;
-    $self->render_text(
-        HTML::FillInForm::Lite->fill(\$html, $param),
+    my $html = $self->render( partial => 1, template => 'mybugs' )->to_string;
+    $self->render(
+        text   => HTML::FillInForm::Lite->fill(\$html, $param),
         format => 'html',
     );
 };
@@ -288,9 +288,9 @@ any '/search' => sub {
         active => '/search',
     );
 
-    my $html = $self->render_partial('search')->to_string;
-    $self->render_text(
-        HTML::FillInForm::Lite->fill(\$html, $param),
+    my $html = $self->render( partial => 1, template => 'search' )->to_string;
+    $self->render(
+        text   => HTML::FillInForm::Lite->fill(\$html, $param),
         format => 'html',
     );
 };
@@ -328,9 +328,9 @@ get  '/create-bug' => sub {
         view   => \%view,
     );
 
-    my $html = $self->render_partial('create-bug')->to_string;
-    $self->render_text(
-        HTML::FillInForm::Lite->fill(\$html, $param),
+    my $html = $self->render( partial => 1, template => 'create-bug' )->to_string;
+    $self->render(
+        text   => HTML::FillInForm::Lite->fill(\$html, $param),
         format => 'html',
     );
 };
@@ -420,9 +420,9 @@ post '/create-bug' => sub {
         view   => \%view,
     );
 
-    my $html = $self->render_partial('create-bug')->to_string;
-    $self->render_text(
-        HTML::FillInForm::Lite->fill( \$html, { %$param, %view } ),
+    my $html = $self->render( partial => 1, template => 'create-bug' )->to_string;
+    $self->render(
+        text   => HTML::FillInForm::Lite->fill( \$html, { %$param, %view } ),
         format => 'html',
     );
 };

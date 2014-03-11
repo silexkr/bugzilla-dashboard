@@ -234,7 +234,7 @@ any '/recent-attachments' => sub {
     }
 
     my $html = $self->render( partial => 1, template => 'recent-attachments' )->to_string;
-    $self->render_text(
+    $self->render(
         text   => HTML::FillInForm::Lite->fill(\$html, $param),
         format => 'html',
     );

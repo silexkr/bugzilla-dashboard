@@ -5,6 +5,7 @@ use utf8;
 use strict;
 use warnings;
 
+use CHI;
 use HTTP::Cookies;
 use JSON::RPC::Legacy::Client;
 use List::Util qw( max );
@@ -26,6 +27,7 @@ sub new {
         remember => 0,
         connect  => 0,
         %params,
+        _cache   => CHI->new( driver => 'File', root_dir => './cache' ),
         _cookie  => HTTP::Cookies->new( {} ),
         _error   => q{},
         _jsonrpc => JSON::RPC::Legacy::Client->new,
@@ -36,6 +38,11 @@ sub new {
     }
 
     return $self;
+}
+
+sub _cache {
+    my $self = shift;
+    return $self->{_cache};
 }
 
 sub _cookie {
@@ -382,6 +389,30 @@ sub attachments {
     return unless $self->_cookie;
     return unless @ids;
 
+    #
+    # load from cache
+    #
+    my @uncached_ids;
+    my %cached_ids;
+    for my $id (@ids) {
+        my $data = $self->_cache->get( "attachment.$id" );
+        if ( defined $data ) {
+            $cached_ids{$id} = $data;
+            next;
+        }
+
+        push @uncached_ids, $id;
+    }
+    warn "attachment cached hit: " . join( ', ', sort keys %cached_ids ) . "\n" if %cached_ids;
+
+    unless (@uncached_ids) {
+        my @attachments = Bugzilla::Dashboard::Attachment->new(
+            map { $cached_ids{$_} } @ids
+        );
+
+        return @attachments;
+    }
+
     my $client = $self->_jsonrpc;
     my $res = try {
         $client->call(
@@ -389,7 +420,7 @@ sub attachments {
             { # callobj
                 method => "Bug.attachments",
                 params => {
-                    attachment_ids => \@ids,
+                    attachment_ids => \@uncached_ids,
                     include_fields => [qw(
                         bug_id
                         content_type
@@ -411,12 +442,12 @@ sub attachments {
     };
 
     unless ($res) {
-        $self->{_error} = $client->status_line;
+        $self->{_error} = 'Bug.attachments: ' . $client->status_line;
         return;
     }
 
     if ( $res->is_error ) {
-        $self->{_error} = $res->error_message;
+        $self->{_error} = 'Bug.attachments: ' . $res->error_message;
         return;
     }
 
@@ -424,10 +455,21 @@ sub attachments {
     return unless $result;
     return unless $result->{attachments};
 
+    #
+    # save to cache
+    #
+    for my $id ( keys %{ $result->{attachments} } ) {
+        next unless defined $result->{attachments}{$id};
+        $self->_cache->set( "attachment.$id", $result->{attachments}{$id} );
+    }
+
     my @attachments = Bugzilla::Dashboard::Attachment->new(
-        map  { $result->{attachments}{$_} }
-        grep { $result->{attachments}{$_} }
-        @ids
+        map  {
+            $cached_ids{$_}           ? $cached_ids{$_}
+            : $result->{attachments}{$_} ? $result->{attachments}{$_}
+            : ()
+            ;
+        } @ids,
     );
 
     return @attachments;
@@ -447,10 +489,35 @@ sub recent_attachments {
 }
 
 sub comments {
-    my ( $self, %params ) = @_;
+    my ( $self, @ids ) = @_;
 
     return unless $self->_jsonrpc;
     return unless $self->_cookie;
+    return unless @ids;
+
+    #
+    # load from cache
+    #
+    my @uncached_ids;
+    my %cached_ids;
+    for my $id (@ids) {
+        my $data = $self->_cache->get( "comment.$id" );
+        if ( defined $data ) {
+            $cached_ids{$id} = $data;
+            next;
+        }
+
+        push @uncached_ids, $id;
+    }
+    warn "comment cached hit: " . join( ', ', sort keys %cached_ids ) . "\n" if %cached_ids;
+
+    unless (@uncached_ids) {
+        my @comments = Bugzilla::Dashboard::Comment->new(
+            map { $cached_ids{$_} } @ids
+        );
+
+        return @comments;
+    }
 
     my $client = $self->_jsonrpc;
     my $res = try {
@@ -459,6 +526,7 @@ sub comments {
             { # callobj
                 method => "Bug.comments",
                 params => {
+                    comment_ids    => \@uncached_ids,
                     include_fields => [qw(
                         id
                         bug_id
@@ -470,7 +538,6 @@ sub comments {
                         creation_time
                         is_private
                     )],
-                    %params,
                 },
             },
             $self->_cookie,
@@ -489,30 +556,26 @@ sub comments {
 
     my $result = $res->result;
     return unless $result;
-    return unless $result->{comments} || $result->{bugs};
+    return unless $result->{comments};
 
-    if ( %{ $result->{comments} } ) {
-        my @comments = Bugzilla::Dashboard::Comment->new(
-            map  { $result->{comments}{$_} }
-            grep { $result->{comments}{$_} }
-            @{ $params{comment_ids} }
-        );
-
-        return @comments;
-    }
-    elsif ( %{ $result->{bugs} } ) {
-        my %comments;
-        for my $bugid ( keys %{ $result->{bugs} } ) {
-            my $cinfo = $result->{bugs}{$bugid}{comments};
-            if (@$cinfo) {
-                $comments{$bugid} = [ Bugzilla::Dashboard::Comment->new(@$cinfo) ];
-            }
-        }
-
-        return %comments;
+    #
+    # save to cache
+    #
+    for my $id ( keys %{ $result->{comments} } ) {
+        next unless defined $result->{comments}{$id};
+        $self->_cache->set( "comment.$id", $result->{comments}{$id} );
     }
 
-    return;
+    my @comments = Bugzilla::Dashboard::Comment->new(
+        map  {
+            $cached_ids{$_}           ? $cached_ids{$_}
+            : $result->{comments}{$_} ? $result->{comments}{$_}
+            : ()
+            ;
+        } @ids,
+    );
+
+    return @comments;
 }
 
 sub recent_comments {
@@ -525,7 +588,7 @@ sub recent_comments {
     my $end   = $self->get_last_comment_id - ( $count * $page );
     my $start = $end - $count + 1;
 
-    return $self->comments( comment_ids => [ reverse $start .. $end ] );
+    return $self->comments( reverse $start .. $end );
 }
 
 sub create_bug {

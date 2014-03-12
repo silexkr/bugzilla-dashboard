@@ -13,7 +13,12 @@ META.yml
 MYMETA.yml
 nytprof.out
 pm_to_blib
+
 .*.swp
 .*.swo
+
 perltidy.ERR
+
+cache/
+
 adminia/

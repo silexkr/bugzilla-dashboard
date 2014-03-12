@@ -427,6 +427,8 @@ post '/create-bug' => sub {
                     remove => [],
                 );
                 for ( split /,/, $param->{blocks} ) {
+                    use experimental qw( smartmatch );
+
                     push @{ $blocks{add} },    $1 when /^\+?(\d+)$/;
                     push @{ $blocks{remove} }, $1 when /^\-(\d+)$/;
                 }
@@ -642,6 +644,7 @@ __DATA__
     <tr>
       <td><a href="/search?query=%3B<%= $bug->product %>"><%= $bug->product %></a></td>
       <td>
+        % use experimental qw( smartmatch );
         % my $priority;
         % given (uc $bug->priority) {
         %   $priority = 'P1' when 'HIGHEST';

@@ -508,24 +508,25 @@ __DATA__
           <span>
             % use Mojo::Util qw(url_escape encode);
             %
+            % my $comment_text = $comment->text || q{};
             % my $create_params = sprintf(
             %   'blocks=%d&summary=%s&description=%s',
             %   $comment->bug_id,
-            %   ( split "\n", $comment->text )[0],
-            %   url_escape( encode('UTF-8', $comment->text) ),
+            %   ( split "\n", $comment_text )[0] || q{},
+            %   url_escape( encode('UTF-8', $comment_text) ),
             % );
             %
             % my $quote_params = do {
             %   my $description = do {
             %     my $header = 'From Bug ' . $comment->bug_id;
-            %     my $content = $comment->text;
+            %     my $content = $comment_text;
             %     $content =~ s/^/> /gms;
             %     "$header\n$content";
             %   };
             %   sprintf(
             %     'blocks=%d&summary=%s&description=%s',
             %     $comment->bug_id,
-            %     ( split "\n", $comment->text )[0],
+            %     ( split "\n", $comment_text )[0] || q{},
             %     url_escape( encode('UTF-8', $description) ),
             %   );
             % };
@@ -534,14 +535,16 @@ __DATA__
             <a class="dashboard-link-tooltip" href="<%= session 'bugzilla_uri' %>/show_bug.cgi?id=<%= $comment->bug_id %>#comment" data-title="답글 달기"> [R] </a>
           </span>
         </div>
-        % my $comment_text = $comment->text;
-        % $comment_text
-        %   = length($comment_text) > $config->{comments_string_length}
-        %   ? substr($comment_text, 0, $config->{comments_string_length}) .  '...'
-        %   : $comment_text
-        %   ;
-        % $comment_text = linkify $comment_text, { bug_id => $comment->bug_id };
-        <pre><%== $comment_text %></pre>
+        % my $cut_text = $comment->text || q{};
+        % if ($cut_text) {
+        %   $cut_text
+        %     = length($cut_text) > $config->{comments_string_length}
+        %     ? substr($cut_text, 0, $config->{comments_string_length}) .  '...'
+        %     : $cut_text
+        %     ;
+        %   $cut_text = linkify $cut_text, { bug_id => $comment->bug_id };
+        % }
+        <pre><%== $cut_text %></pre>
       </td>
     </tr>
     % }

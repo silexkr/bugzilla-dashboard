@@ -11,17 +11,21 @@ use Bugzilla::Dashboard;
 
 binmode STDOUT, ':utf8';
 
+my $COUNT = 10;
+my $PAGE  = 0;
+
 my ( $opt, $usage ) = describe_options(
     "%c %o <count>",
-    [ 'user|u=s',     'username' ],
-    [ 'password|p=s', 'password' ],
-    [ 'uri=s',        'the URI to connect to', ],
+    [ 'user|u=s',      "username" ],
+    [ 'password|p=s',  "password" ],
+    [ 'uri=s',         "the URI to connect to", ],
+    [ 'count|c=i',     "count (default: $COUNT)", { default => $COUNT } ],
+    [ 'page|p=i',      "page (default: $PAGE)",   { default => $PAGE  } ],
     [],
     [ 'help|h', 'print usage' ],
 );
-print($usage->text), exit if $opt->help;
-
-my $count = shift || 20;
+print($usage->text), exit if     $opt->help;
+print($usage->text), exit unless $opt->count;
 
 my %connect_info;
 $connect_info{user}     = $opt->user     if $opt->user;
@@ -32,8 +36,8 @@ $connect_info{connect}  = 1;
 my $dashboard = Bugzilla::Dashboard->new(%connect_info)
     or die "cannot connect to json-rpc server\n";
 
-# fetch recent 20 attachments
-my @attachments = $dashboard->recent_attachments($count);
+my @attachments = $dashboard->recent_attachments( $opt->count, $opt->page );
+
 for my $attachment (@attachments) {
     say "ID: ",                $attachment->id;
     say "    BUGID: ",         $attachment->bug_id;

@@ -425,46 +425,25 @@ sub attachments {
     return unless $result->{attachments};
 
     my @attachments = Bugzilla::Dashboard::Attachment->new(
-        map { $result->{attachments}{$_} } keys %{ $result->{attachments} }
+        map  { $result->{attachments}{$_} }
+        grep { $result->{attachments}{$_} }
+        @ids
     );
 
     return @attachments;
 }
 
-sub get_max_attachment_id {
-    my ( $self, $basis ) = @_;
-
-    $basis = 500 if !$basis || $basis < 500;
-
-    my $max = $basis;
-    my $end_point = 2 * $basis;
-    while (1) {
-        my @attachments = $self->attachments( $max .. $end_point );
-
-        $max = max map { $_->id } @attachments;
-        unless ($max) {
-            $max       = 1;
-            $end_point = $basis;
-            next;
-        }
-
-        last if $max < $end_point;
-        $end_point *= 2;
-    }
-
-    return $max;
-}
-
 sub recent_attachments {
-    my ( $self, $count ) = @_;
+    my ( $self, $count, $page ) = @_;
 
-    my $max_aid = $self->get_max_attachment_id;
+    return unless $count;
 
-    my $start       = $max_aid - $count + 1;
-    my $end         = $max_aid;
-    my @attachments = reverse sort { $a->id <=> $b->id } $self->attachments( $start .. $end );
+    $page ||= 0;
 
-    return @attachments;
+    my $end   = $self->get_last_attachment_id - ( $count * $page );
+    my $start = $end - $count + 1;
+
+    return $self->attachments( reverse $start .. $end );
 }
 
 sub comments {
@@ -514,10 +493,9 @@ sub comments {
 
     if ( %{ $result->{comments} } ) {
         my @comments = Bugzilla::Dashboard::Comment->new(
-            map {
-                my $cinfo = $result->{comments}{$_};
-                $cinfo ? $cinfo : ();
-            } keys %{ $result->{comments} }
+            map  { $result->{comments}{$_} }
+            grep { $result->{comments}{$_} }
+            @{ $params{comment_ids} }
         );
 
         return @comments;
@@ -538,34 +516,16 @@ sub comments {
 }
 
 sub recent_comments {
-    my ( $self, $dt, $limit ) = @_;
+    my ( $self, $count, $page ) = @_;
 
-    return unless $dt;
-    return unless $limit;
+    return unless $count;
 
-    my $iso8601_str = $dt->strftime('%Y-%m-%dT%H:%M:%S%z');
+    $page ||= 0;
 
-    my @bugs = $self->search(
-        last_change_time => $iso8601_str,
-        include_fields   => [qw( id )],
-    );
-    return unless @bugs;
+    my $end   = $self->get_last_comment_id - ( $count * $page );
+    my $start = $end - $count + 1;
 
-    my %comments = $self->comments(
-        ids       => [ map $_->id, @bugs ],
-        new_since => $iso8601_str,
-    );
-    return unless %comments;
-
-    my @comments;
-    for my $bugid  ( keys %comments ) {
-        push @comments, @{ $comments{$bugid} };
-    }
-
-    my $end_index = @comments < $limit ? $#comments : $limit - 1;
-    @comments = ( sort { $b->id <=> $a->id } @comments )[ 0 .. $end_index ];
-
-    return @comments;
+    return $self->comments( comment_ids => [ reverse $start .. $end ] );
 }
 
 sub create_bug {

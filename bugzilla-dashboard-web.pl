@@ -167,20 +167,20 @@ any '/recent-comments' => sub {
     }
 
     my $param = $self->req->params->to_hash;
-    $param->{date}  ||= DateTime->now->add(days => -1)->ymd;
-    $param->{limit} ||= $self->app->config->{recent_comments_limit};
+    $param->{count} ||= $self->app->config->{recent_comments_count};
+    $param->{page}  ||= 0;
 
     # Validation Rule
     my $rule = [
-        date  => [ 'date_to_timepiece' ],
-        limit => [ 'int' ],
+        count => [ 'int' ],
+        page  => [ 'int' ],
     ];
 
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
         my @comments = $DASHBOARD->recent_comments(
-            DateTime::Format::ISO8601->parse_datetime($param->{date}),
-            $param->{limit},
+            $param->{count},
+            $param->{page},
         );
 
         $self->stash(
@@ -213,14 +213,22 @@ any '/recent-attachments' => sub {
     }
 
     my $param = $self->req->params->to_hash;
-    $param->{limit} ||= $self->app->config->{recent_attachments_limit};
+    $param->{count} ||= $self->app->config->{recent_attachments_count};
+    $param->{page}  ||= 0;
 
     # Validation Rule
-    my $rule = [ limit => [ 'int' ] ];
+    my $rule = [
+        count => [ 'int' ],
+        page  => [ 'int' ],
+    ];
 
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
-        my @attachments = $DASHBOARD->recent_attachments($param->{limit});
+        my @attachments = $DASHBOARD->recent_attachments(
+            $param->{count},
+            $param->{page},
+        );
+
         $self->stash(
             view   => { attachments => \@attachments },
             active => '/recent-attachments',
@@ -545,8 +553,7 @@ __DATA__
 % layout 'default', csses => [], jses => [];
 % title '최근 변경 이력의 제공';
 <form method="post" enctype="application/x-www-form-urlencoded" class="form-inline">
-  <input class="input-medium datepicker" type="text" name="date" placeholder="검색을 시작할 날짜" />
-  <input class="input-medium" type="text" name="limit" placeholder="갯수" />
+  <input class="input-medium" type="text" name="count" placeholder="갯수" />
   <input class="btn btn-primary" type="submit" value="찾기" />
 </form>
 %= include 'commenttable', comments => $view->{comments};
@@ -556,7 +563,7 @@ __DATA__
 % layout 'default', csses => [], jses => [];
 % title '최근 추가된 첨부파일';
 <form method="post" enctype="application/x-www-form-urlencoded" class="form-inline">
-  <input class="input-medium" type="text" name="limit" placeholder="갯수" />
+  <input class="input-medium" type="text" name="count" placeholder="갯수" />
   <input class="btn btn-primary" type="submit" value="찾기" />
 </form>
 <table class="table table-striped table-bordered table-hover">

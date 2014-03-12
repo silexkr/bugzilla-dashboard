@@ -745,4 +745,77 @@ sub get_user {
     return $users;
 }
 
+sub _get_last {
+    my ( $self, $type, %params ) = @_;
+
+    $self->{_error} = 'invalid json rpc object', return unless $self->_jsonrpc;
+    $self->{_error} = 'invalid cookie',          return unless $self->_cookie;
+
+    my $method;
+    {
+        use experimental qw( smartmatch );
+        given ($type) {
+            $method = 'GetLast.bug'        when 'bug';
+            $method = 'GetLast.comment'    when 'comment';
+            $method = 'GetLast.attachment' when 'attachment';
+        }
+    }
+
+    my $client = $self->_jsonrpc;
+    my $res = try {
+        $client->call(
+            $self->uri,
+            { # callobj
+                method => $method,
+                params => {
+                    # additional parameters
+                    %params,
+                },
+            },
+            $self->_cookie,
+        );
+    };
+
+    unless ($res) {
+        $self->{_error} = "$method " . $client->status_line;
+        return;
+    }
+
+    if ( $res->is_error ) {
+        use experimental qw( smartmatch );
+
+        $self->{_error} = "$method ";
+        given ( $res->obj->code ) {
+            $self->{_error} .= '51 (Bad Login Name or Group Name)'               when 51;
+            $self->{_error} .= '304 (Authorization Required)'                    when 304;
+            $self->{_error} .= '505 (User Access By Id or User-Matching Denied)' when 505;
+            default { $self->{_error} .= $res->error_message; }
+        }
+        return;
+    }
+
+    my $result = $res->result;
+    $self->{_error} = "$method no comment", return unless $result;
+
+    return $result
+}
+
+sub get_last_bug_id {
+    my ( $self, %params ) = @_;
+
+    return $self->_get_last( 'bug', %params );
+}
+
+sub get_last_comment_id {
+    my ( $self, %params ) = @_;
+
+    return $self->_get_last( 'comment', %params );
+}
+
+sub get_last_attachment_id {
+    my ( $self, %params ) = @_;
+
+    return $self->_get_last( 'attachment', %params );
+}
+
 1;

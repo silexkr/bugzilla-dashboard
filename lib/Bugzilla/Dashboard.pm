@@ -211,6 +211,8 @@ sub generate_query_params {
 
     my @keywords = split(/ /, $query);
     for my $keyword (@keywords) {
+        use experimental qw( smartmatch );
+
         if ( $keyword eq 'OPEN' ) {
             push @{ $params{status} }, qw( UNCONFIRMED CONFIRMED IN_PROGRESS );
         }
@@ -599,6 +601,8 @@ sub create_bug {
     }
 
     if ( $res->is_error ) {
+        use experimental qw( smartmatch );
+
         $self->{_error} = 'Bug.comments: ';
         given ( $res->obj->code ) {
             $self->{_error} .= '51 (Invalid Object)'            when 51;
@@ -651,6 +655,8 @@ sub update_bug {
     }
 
     if ( $res->is_error ) {
+        use experimental qw( smartmatch );
+
         $self->{_error} = 'Bug.comments: ';
         given ( $res->obj->code ) {
             $self->{_error} .= '50 (Empty Field)'                when 50;
@@ -718,6 +724,8 @@ sub get_user {
     }
 
     if ( $res->is_error ) {
+        use experimental qw( smartmatch );
+
         $self->{_error} = 'User.get: ';
         given ( $res->obj->code ) {
             $self->{_error} .= '51 (Bad Login Name or Group Name)'               when 51;

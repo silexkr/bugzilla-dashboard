@@ -139,7 +139,7 @@ helper error => sub {
 
     app->log->error( $error->{str} );
 
-    no warnings 'experimental';
+    use experimental qw( smartmatch );
     my $template;
     given ($status) {
         $template = 'bad_request' when 400;

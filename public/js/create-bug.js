@@ -1,13 +1,5 @@
 $(function() {
 
-  // only create a new bug button can submit the form
-  $('#form-create-bug').submit(function(e) {
-    e.preventDefault();
-  });
-  $('#btn-create-bug').click(function(e) {
-    return $('#form-create-bug').trigger('submit');
-  });
-
   // update product, component and version
   function update_bug_info( product, component, version ) {
     if ( product !== null && product !== undefined ) {
@@ -44,6 +36,8 @@ $(function() {
       ' <button id="btn-clear-block" class="btn btn-warning btn-small"> Clear </button>'
     );
     $('#btn-clear-block').click(function(e) {
+      // only create a new bug button can submit the form
+      e.preventDefault();
       update_bug_info();
     });
 
@@ -56,6 +50,9 @@ $(function() {
       );
     }
     $('.btn-sync-block').click(function(e) {
+      // only create a new bug button can submit the form
+      e.preventDefault();
+
       var block = $(this).html();
 
       $.ajax("/api/bug/" + block + ".json", {

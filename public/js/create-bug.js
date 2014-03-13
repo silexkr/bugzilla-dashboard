@@ -64,7 +64,7 @@ $(function() {
         success: function(data, textStatus, jqXHR) {
           update_bug_info( data.product, data.component, data.version );
         },
-        error: function(jqXHR, textStatus, errorThrown) {}
+        error: function(jqXHR, textStatus, errorThrown) {},
         complete: function(jqXHR, textStatus) {}
       });
     });

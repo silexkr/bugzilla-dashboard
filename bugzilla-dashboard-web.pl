@@ -134,6 +134,65 @@ helper linkify => sub {
     return $result;
 };
 
+helper error => sub {
+    my ($self, $status, $error) = @_;
+
+    app->log->error( $error->{str} );
+
+    no warnings 'experimental';
+    my $template;
+    given ($status) {
+        $template = 'bad_request' when 400;
+        $template = 'not_found'   when 404;
+        $template = 'exception'   when 500;
+        default { $template = 'unknown' }
+    }
+
+    $self->respond_to(
+        json => { status => $status, json  => { error => $error || q{} } },
+        html => { status => $status, error => $error->{str} || q{}, template => $template },
+    );
+
+    return;
+};
+
+group {
+    under '/api';
+
+    get '/bug/:id' => sub {
+        my $self = shift;
+
+        return $self->error( 401, {
+            str  => 'not logged in',
+            data => {},
+        }) unless $self->session('user');
+
+        unless ( $DASHBOARD->connect ) {
+            my $user = $self->session('user');
+
+            return $self->error( 401, {
+                str  => 'login failed',
+                data => {},
+            }) unless $self->login( $user->{email}, $user->{password}, $user->{remember} );
+        }
+
+        my ( $bug ) = $DASHBOARD->bugs( $self->param('id') );
+        return $self->error( 404, {
+            str  => 'no such bug',
+            data => {},
+        }) unless $bug;
+
+        my $data = {
+            id        => $bug->id,
+            product   => $bug->product,
+            component => $bug->component,
+            version   => $bug->version,
+        };
+
+        $self->respond_to( json => { status => 200, json => $data } );
+    };
+};
+
 any '/' => sub {
     my $self = shift;
 
@@ -708,10 +767,10 @@ __DATA__
 
 
 @@ create-bug.html.ep
-% layout 'default', csses => [], jses => [];
+% layout 'default', csses => [], jses => [ 'create-bug.js' ];
 % title '버그 만들기';
 <div>
-  <form action="/create-bug" method="post" class="form-horizontal">
+  <form action="/create-bug" method="post" id="form-create-bug" class="form-horizontal">
 
     <div class="control-group">
       <label class="control-label" for="summary">Summary</label>
@@ -731,17 +790,24 @@ __DATA__
       </div>
     </div>
 
+    <div class="control-group">
+      <label class="control-label" for="blocks">Sync Bug Info</label>
+      <div class="controls">
+        <span id="block-buttons"> </span>
+      </div>
+    </div>
+
     <input type="hidden" id="product" name="product">
     <input type="hidden" id="component" name="component">
     <input type="hidden" id="version" name="version">
 
     <div class="form-actions">
-      <input class="btn btn-primary" type="submit" value="Create a New Bug">
+      <input id="btn-create-bug" class="btn btn-primary" type="submit" value="Create a New Bug">
       <span>
         as
-        <strong><%= $view->{product} %></strong> /
-        <strong><%= $view->{component} %></strong> /
-        <strong><%= $view->{version} %></strong>
+        <strong id="lbl-product"><%= $view->{product} %></strong> /
+        <strong id="lbl-component"><%= $view->{component} %></strong> /
+        <strong id="lbl-version"><%= $view->{version} %></strong>
       </span>
     </div>
   </form>

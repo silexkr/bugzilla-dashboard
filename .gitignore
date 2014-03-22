@@ -22,3 +22,5 @@ perltidy.ERR
 cache/
 
 adminia/
+
+app.conf

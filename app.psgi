@@ -215,6 +215,33 @@ get '/logout' => sub {
     $self->redirect_to('/');
 };
 
+under sub {
+    my $self = shift;
+
+    $DASHBOARD = Bugzilla::Dashboard->new( %{ app->defaults->{connect} } ) unless $DASHBOARD;
+
+    unless ( $self->session('user') ) {
+        $self->redirect_to('/logout');
+        return;
+    }
+
+    unless ( $DASHBOARD->connect ) {
+        app->log->debug('dashboard does not connected');
+
+        my $user = $self->session('user');
+        app->log->debug("sessioned user: " . $user->{email});
+        unless ( $self->login( $user->{email}, $user->{password}, $user->{remember} ) ) {
+            $self->redirect_to('/logout');
+            return;
+        }
+    }
+
+    my $user = $self->session('user');
+    app->log->debug("connected user: " . $user->{email});
+
+    return 1;
+};
+
 any '/recent-comments' => sub {
     my $self = shift;
 

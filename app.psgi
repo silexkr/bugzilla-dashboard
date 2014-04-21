@@ -156,19 +156,56 @@ helper error => sub {
     return;
 };
 
+helper init_dashboard => sub {
+    my $self = shift;
+
+    my $user      = $self->session('user');
+    my $dashboard = $DASHBOARD{ $user->{email} };
+
+    return unless $user;
+
+    unless ($dashboard) {
+        $dashboard = Bugzilla::Dashboard->new( %{ app->defaults->{connect} } );
+        $DASHBOARD{ $user->{email} } = $dashboard;
+    }
+
+    unless ( $dashboard->connect ) {
+        app->log->debug('dashboard does not connected');
+        app->log->debug("sessioned user: " . $user->{email});
+        unless ( $self->login( $user->{email}, $user->{password}, $user->{remember} ) ) {
+            return;
+        }
+    }
+
+    $self->session(
+        user         => $user,
+        bugzilla_uri => dirname( $dashboard->uri ),
+        expiration   => $user->{remember} ? $self->app->config->{expire}{remember} : $self->app->config->{expire}{default},
+    );
+
+    app->log->debug("connected user: " . $user->{email});
+
+    return 1;
+};
+
 group {
-    under '/api';
+    under '/api' => sub {
+        my $self = shift;
+
+        my $ret = $self->init_dashboard;
+        return $self->error( 401, {
+            str  => 'not logged in',
+            data => {},
+        }) unless $ret;
+
+        return 1;
+    };
 
     get '/bug/:id' => sub {
         my $self = shift;
 
         my $user      = $self->session('user');
         my $dashboard = $DASHBOARD{ $user->{email} };
-
-        return $self->error( 401, {
-            str  => 'not logged in',
-            data => {},
-        }) unless $user;
 
         unless ( $dashboard->connect ) {
             return $self->error( 401, {
@@ -220,32 +257,11 @@ get '/logout' => sub {
 under sub {
     my $self = shift;
 
-    my $user      = $self->session('user');
-    my $dashboard = $DASHBOARD{ $user->{email} };
-
-    unless ($user) {
+    my $ret = $self->init_dashboard;
+    unless ($ret) {
         $self->redirect_to('/logout');
         return;
     }
-
-    $dashboard = Bugzilla::Dashboard->new( %{ app->defaults->{connect} } ) unless $dashboard;
-
-    unless ( $dashboard->connect ) {
-        app->log->debug('dashboard does not connected');
-        app->log->debug("sessioned user: " . $user->{email});
-        unless ( $self->login( $user->{email}, $user->{password}, $user->{remember} ) ) {
-            $self->redirect_to('/logout');
-            return;
-        }
-    }
-
-    $self->session(
-        user         => $user,
-        bugzilla_uri => dirname( $dashboard->uri ),
-        expiration   => $user->{remember} ? $self->app->config->{expire}{remember} : $self->app->config->{expire}{default},
-    );
-
-    app->log->debug("connected user: " . $user->{email});
 
     return 1;
 };

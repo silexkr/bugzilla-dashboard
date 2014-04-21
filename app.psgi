@@ -20,7 +20,7 @@ my %DEFAULT_STASH = (
 );
 app->defaults(%DEFAULT_STASH);
 
-my $DASHBOARD = Bugzilla::Dashboard->new( %{ app->defaults->{connect} } );
+my %DASHBOARD;
 
 my $vc = Validator::Custom->new;
 
@@ -59,7 +59,7 @@ helper login => sub {
         return;
     }
 
-    $DASHBOARD = $dashboard;
+    $DASHBOARD{$email} = $dashboard;
     $self->app->config->{users}{data}{$username}{password} = $password;
     $self->app->config->{users}{data}{$username}{remember} = $remember;
 
@@ -162,21 +162,22 @@ group {
     get '/bug/:id' => sub {
         my $self = shift;
 
+        my $user      = $self->session('user');
+        my $dashboard = $DASHBOARD{ $user->{email} };
+
         return $self->error( 401, {
             str  => 'not logged in',
             data => {},
-        }) unless $self->session('user');
+        }) unless $user;
 
-        unless ( $DASHBOARD->connect ) {
-            my $user = $self->session('user');
-
+        unless ( $dashboard->connect ) {
             return $self->error( 401, {
                 str  => 'login failed',
                 data => {},
             }) unless $self->login( $user->{email}, $user->{password}, $user->{remember} );
         }
 
-        my ( $bug ) = $DASHBOARD->bugs( $self->param('id') );
+        my ( $bug ) = $dashboard->bugs( $self->param('id') );
         return $self->error( 404, {
             str  => 'no such bug',
             data => {},
@@ -210,7 +211,8 @@ any '/' => sub {
 get '/logout' => sub {
     my $self = shift;
 
-    undef $DASHBOARD;
+    my $user = $self->session('user');
+    delete $DASHBOARD{ $user->{email} };
     $self->session(expires => 1);
     $self->redirect_to('/');
 };
@@ -218,17 +220,18 @@ get '/logout' => sub {
 under sub {
     my $self = shift;
 
-    $DASHBOARD = Bugzilla::Dashboard->new( %{ app->defaults->{connect} } ) unless $DASHBOARD;
+    my $user      = $self->session('user');
+    my $dashboard = $DASHBOARD{ $user->{email} };
 
-    unless ( $self->session('user') ) {
+    unless ($user) {
         $self->redirect_to('/logout');
         return;
     }
 
-    unless ( $DASHBOARD->connect ) {
-        app->log->debug('dashboard does not connected');
+    $dashboard = Bugzilla::Dashboard->new( %{ app->defaults->{connect} } ) unless $dashboard;
 
-        my $user = $self->session('user');
+    unless ( $dashboard->connect ) {
+        app->log->debug('dashboard does not connected');
         app->log->debug("sessioned user: " . $user->{email});
         unless ( $self->login( $user->{email}, $user->{password}, $user->{remember} ) ) {
             $self->redirect_to('/logout');
@@ -236,7 +239,12 @@ under sub {
         }
     }
 
-    my $user = $self->session('user');
+    $self->session(
+        user         => $user,
+        bugzilla_uri => dirname( $dashboard->uri ),
+        expiration   => $user->{remember} ? $self->app->config->{expire}{remember} : $self->app->config->{expire}{default},
+    );
+
     app->log->debug("connected user: " . $user->{email});
 
     return 1;
@@ -245,9 +253,11 @@ under sub {
 any '/recent-comments' => sub {
     my $self = shift;
 
-    return $self->redirect_to('/') unless $self->session('user');
-    unless ( $DASHBOARD->connect ) {
-        my $user = $self->session('user');
+    my $user      = $self->session('user');
+    my $dashboard = $DASHBOARD{ $user->{email} };
+
+    return $self->redirect_to('/') unless $user;
+    unless ( $dashboard->connect ) {
         $self->redirect_to('/logout')
             unless $self->login( $user->{email}, $user->{password}, $user->{remember} );
     }
@@ -264,7 +274,7 @@ any '/recent-comments' => sub {
 
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
-        my @comments = $DASHBOARD->recent_comments(
+        my @comments = $dashboard->recent_comments(
             $param->{count},
             $param->{page},
         );
@@ -291,9 +301,11 @@ any '/recent-comments' => sub {
 any '/recent-attachments' => sub {
     my $self = shift;
 
-    return $self->redirect_to('/') unless $self->session('user');
-    unless ( $DASHBOARD->connect ) {
-        my $user = $self->session('user');
+    my $user      = $self->session('user');
+    my $dashboard = $DASHBOARD{ $user->{email} };
+
+    return $self->redirect_to('/') unless $user;
+    unless ( $dashboard->connect ) {
         $self->redirect_to('/logout')
             unless $self->login( $user->{email}, $user->{password}, $user->{remember} );
     }
@@ -310,7 +322,7 @@ any '/recent-attachments' => sub {
 
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
-        my @attachments = $DASHBOARD->recent_attachments(
+        my @attachments = $dashboard->recent_attachments(
             $param->{count},
             $param->{page},
         );
@@ -337,9 +349,11 @@ any '/recent-attachments' => sub {
 any '/mybugs' => sub {
     my $self = shift;
 
-    return $self->redirect_to('login') unless $self->session('user');
-    unless ( $DASHBOARD->connect ) {
-        my $user = $self->session('user');
+    my $user      = $self->session('user');
+    my $dashboard = $DASHBOARD{ $user->{email} };
+
+    return $self->redirect_to('login') unless $user;
+    unless ( $dashboard->connect ) {
         $self->redirect_to('/logout')
             unless $self->login( $user->{email}, $user->{password}, $user->{remember} );
     }
@@ -352,7 +366,7 @@ any '/mybugs' => sub {
 
     my $vresult = $vc->validate($param, $rule);
     if ($vresult->is_ok) {
-        my @mybugs = $DASHBOARD->mybugs($param->{user});
+        my @mybugs = $dashboard->mybugs($param->{user});
         my %priority_table = (
             Highest => 5,
             High    => 4,
@@ -386,17 +400,19 @@ any '/mybugs' => sub {
 any '/search' => sub {
     my $self = shift;
 
-    return $self->redirect_to('login') unless $self->session('user');
-    unless ( $DASHBOARD->connect ) {
-        my $user = $self->session('user');
+    my $user      = $self->session('user');
+    my $dashboard = $DASHBOARD{ $user->{email} };
+
+    return $self->redirect_to('login') unless $user;
+    unless ( $dashboard->connect ) {
         $self->redirect_to('/logout')
             unless $self->login( $user->{email}, $user->{password}, $user->{remember} );
     }
 
     my $param = $self->req->params->to_hash;
 
-    my %search_params = $DASHBOARD->generate_query_params( $param->{query} );
-    my @bugs = $DASHBOARD->search(%search_params);
+    my %search_params = $dashboard->generate_query_params( $param->{query} );
+    my @bugs = $dashboard->search(%search_params);
     @bugs = reverse sort { $a->last_change_time->epoch cmp $b->last_change_time->epoch } @bugs;
     $self->stash(
         view   => { bug => \@bugs },
@@ -413,9 +429,11 @@ any '/search' => sub {
 get  '/create-bug' => sub {
     my $self = shift;
 
-    return $self->redirect_to('login') unless $self->session('user');
-    unless ( $DASHBOARD->connect ) {
-        my $user = $self->session('user');
+    my $user      = $self->session('user');
+    my $dashboard = $DASHBOARD{ $user->{email} };
+
+    return $self->redirect_to('login') unless $user;
+    unless ( $dashboard->connect ) {
         $self->redirect_to('/logout')
             unless $self->login( $user->{email}, $user->{password}, $user->{remember} );
     }
@@ -458,9 +476,11 @@ get  '/create-bug' => sub {
 post '/create-bug' => sub {
     my $self = shift;
 
-    return $self->redirect_to('login') unless $self->session('user');
-    unless ( $DASHBOARD->connect ) {
-        my $user = $self->session('user');
+    my $user      = $self->session('user');
+    my $dashboard = $DASHBOARD{ $user->{email} };
+
+    return $self->redirect_to('login') unless $user;
+    unless ( $dashboard->connect ) {
         $self->redirect_to('/logout')
             unless $self->login( $user->{email}, $user->{password}, $user->{remember} );
     }
@@ -490,7 +510,7 @@ post '/create-bug' => sub {
 
     my $vresult = $vc->validate($param, $rule);
     if ( $vresult->is_ok ) {
-        my $bug = $DASHBOARD->create_bug(
+        my $bug = $dashboard->create_bug(
             product     => $param->{product},
             component   => $param->{component},
             version     => $param->{version},
@@ -519,19 +539,19 @@ post '/create-bug' => sub {
                     push @{ $blocks{remove} }, $1 when /^\-(\d+)$/;
                 }
 
-                my $bugs_info = $DASHBOARD->update_bug(
+                my $bugs_info = $dashboard->update_bug(
                     ids    => [ $bug ],
                     blocks => \%blocks,
                 );
 
                 unless ($bugs_info) {
-                    $view{error} = $DASHBOARD->error;
+                    $view{error} = $dashboard->error;
                     $view{blocks} = q{};
                 }
             }
         }
         else {
-            $view{error} = $DASHBOARD->error;
+            $view{error} = $dashboard->error;
 
             $view{product}   = $self->app->config->{default_product};
             $view{component} = $self->app->config->{default_component};

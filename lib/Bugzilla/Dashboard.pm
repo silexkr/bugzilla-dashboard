@@ -14,7 +14,6 @@ use Try::Tiny;
 use Bugzilla::Dashboard::Attachment;
 use Bugzilla::Dashboard::Bug;
 use Bugzilla::Dashboard::Comment;
-use Bugzilla::Dashboard::Patch;
 
 sub new {
     my $class  = shift;
@@ -26,9 +25,9 @@ sub new {
         password => $ENV{BUGZILLA_DASHBOARD_PASSWORD},
         remember => 0,
         connect  => 0,
+        token    => q{},
         %params,
         _cache   => CHI->new( driver => 'File', root_dir => './cache' ),
-        _cookie  => HTTP::Cookies->new( {} ),
         _error   => q{},
         _jsonrpc => JSON::RPC::Legacy::Client->new,
     }, $class;
@@ -43,11 +42,6 @@ sub new {
 sub _cache {
     my $self = shift;
     return $self->{_cache};
-}
-
-sub _cookie {
-    my $self = shift;
-    return $self->{_cookie};
 }
 
 sub error {
@@ -85,11 +79,15 @@ sub connect {
     return $self->{connect};
 }
 
+sub token {
+    my $self = shift;
+    return $self->{token};
+}
+
 sub do_connect {
     my $self = shift;
 
     $self->{_error} = 'invalid json rpc object', return unless $self->_jsonrpc;
-    $self->{_error} = 'invalid cookie',          return unless $self->_cookie;
 
     my $client = $self->_jsonrpc;
     my $res = try {
@@ -117,12 +115,8 @@ sub do_connect {
         return;
     }
 
-    #
-    # extract cookie and add cookie
-    #
-    $self->_cookie->extract_cookies( $res->obj );
-    $client->ua->cookie_jar( $self->_cookie );
     $self->{connect} = 1;
+    $self->{token}   = $res->content->{result}{token};
 
     return $self;
 }
@@ -131,7 +125,7 @@ sub search {
     my ( $self, %params ) = @_;
 
     return unless $self->_jsonrpc;
-    return unless $self->_cookie;
+    return unless $self->token;
 
     my $client = $self->_jsonrpc;
     my $res = try {
@@ -140,6 +134,7 @@ sub search {
             { # callobj
                 method => "Bug.search",
                 params => {
+                    Bugzilla_token => $self->token,
                     include_fields => [qw(
                         priority
                         creator
@@ -162,7 +157,6 @@ sub search {
                     %params,
                 },
             },
-            $self->_cookie,
         );
     };
 
@@ -282,7 +276,7 @@ sub bugs {
     my ( $self, @ids ) = @_;
 
     return unless $self->_jsonrpc;
-    return unless $self->_cookie;
+    return unless $self->token;
 
     my $client = $self->_jsonrpc;
     my $res = try {
@@ -291,6 +285,7 @@ sub bugs {
             { # callobj
                 method => "Bug.get",
                 params => {
+                    Bugzilla_token => $self->token,
                     include_fields => [qw(
                         priority
                         creator
@@ -314,7 +309,6 @@ sub bugs {
                     ids        => \@ids,
                 },
             },
-            $self->_cookie,
         );
     };
 
@@ -352,7 +346,7 @@ sub history {
     my ( $self, @ids ) = @_;
 
     return unless $self->_jsonrpc;
-    return unless $self->_cookie;
+    return unless $self->token;
     return unless @ids;
 
     my $client = $self->_jsonrpc;
@@ -362,10 +356,10 @@ sub history {
             { # callobj
                 method => "Bug.history",
                 params => {
-                    ids => \@ids,
+                    Bugzilla_token => $self->token,
+                    ids            => \@ids,
                 },
             },
-            $self->_cookie,
         );
     };
 
@@ -386,7 +380,7 @@ sub attachments {
     my ( $self, @ids ) = @_;
 
     return unless $self->_jsonrpc;
-    return unless $self->_cookie;
+    return unless $self->token;
     return unless @ids;
 
     #
@@ -420,6 +414,7 @@ sub attachments {
             { # callobj
                 method => "Bug.attachments",
                 params => {
+                    Bugzilla_token => $self->token,
                     attachment_ids => \@uncached_ids,
                     include_fields => [qw(
                         bug_id
@@ -437,7 +432,6 @@ sub attachments {
                     )],
                 },
             },
-            $self->_cookie,
         );
     };
 
@@ -492,7 +486,7 @@ sub comments {
     my ( $self, @ids ) = @_;
 
     return unless $self->_jsonrpc;
-    return unless $self->_cookie;
+    return unless $self->token;
     return unless @ids;
 
     #
@@ -526,6 +520,7 @@ sub comments {
             { # callobj
                 method => "Bug.comments",
                 params => {
+                    Bugzilla_token => $self->token,
                     comment_ids    => \@uncached_ids,
                     include_fields => [qw(
                         id
@@ -540,7 +535,6 @@ sub comments {
                     )],
                 },
             },
-            $self->_cookie,
         );
     };
 
@@ -595,7 +589,7 @@ sub create_bug {
     my ( $self, %params ) = @_;
 
     return unless $self->_jsonrpc;
-    return unless $self->_cookie;
+    return unless $self->token;
 
     $self->{_error} = 'Bug.create: product is needed',     return unless $params{product};
     $self->{_error} = 'Bug.create: component is needed',   return unless $params{component};
@@ -611,10 +605,10 @@ sub create_bug {
             { # callobj
                 method => "Bug.create",
                 params => {
+                    Bugzilla_token => $self->token,
                     %params,
                 },
             },
-            $self->_cookie,
         );
     };
 
@@ -653,7 +647,7 @@ sub update_bug {
     my ( $self, %params ) = @_;
 
     return unless $self->_jsonrpc;
-    return unless $self->_cookie;
+    return unless $self->token;
 
     $self->{_error} = 'Bug.update: ids is needed', return unless $params{ids};
 
@@ -665,10 +659,10 @@ sub update_bug {
             { # callobj
                 method => "Bug.update",
                 params => {
+                    Bugzilla_token => $self->token,
                     %params,
                 },
             },
-            $self->_cookie,
         );
     };
 
@@ -713,7 +707,7 @@ sub get_user {
     my ( $self, %params ) = @_;
 
     $self->{_error} = 'invalid json rpc object', return unless $self->_jsonrpc;
-    $self->{_error} = 'invalid cookie',          return unless $self->_cookie;
+    $self->{_error} = 'invalid token',           return unless $self->token;
 
     my $client = $self->_jsonrpc;
     my $res = try {
@@ -722,6 +716,7 @@ sub get_user {
             { # callobj
                 method => "User.get",
                 params => {
+                    Bugzilla_token => $self->token,
                     include_fields => [qw(
                         id
                         real_name
@@ -737,7 +732,6 @@ sub get_user {
                     %params,
                 },
             },
-            $self->_cookie,
         );
     };
 
@@ -772,7 +766,7 @@ sub _get_last {
     my ( $self, $type, %params ) = @_;
 
     $self->{_error} = 'invalid json rpc object', return unless $self->_jsonrpc;
-    $self->{_error} = 'invalid cookie',          return unless $self->_cookie;
+    $self->{_error} = 'invalid token',           return unless $self->token;
 
     my $method;
     {
@@ -791,11 +785,11 @@ sub _get_last {
             { # callobj
                 method => $method,
                 params => {
+                    Bugzilla_token => $self->token,
                     # additional parameters
                     %params,
                 },
             },
-            $self->_cookie,
         );
     };
 

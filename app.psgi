@@ -307,7 +307,7 @@ any '/recent-comments' => sub {
         );
     }
 
-    my $html = $self->render( partial => 1, template => 'recent-comments' )->to_string;
+    my $html = $self->render_to_string( template => 'recent-comments' );
     $self->render(
         text   => HTML::FillInForm::Lite->fill(\$html, $param),
         format => 'html',
@@ -355,7 +355,7 @@ any '/recent-attachments' => sub {
         );
     }
 
-    my $html = $self->render( partial => 1, template => 'recent-attachments' )->to_string;
+    my $html = $self->render_to_string( template => 'recent-attachments' );
     $self->render(
         text   => HTML::FillInForm::Lite->fill(\$html, $param),
         format => 'html',
@@ -406,7 +406,7 @@ any '/mybugs' => sub {
         );
     }
 
-    my $html = $self->render( partial => 1, template => 'mybugs' )->to_string;
+    my $html = $self->render_to_string( template => 'mybugs' );
     $self->render(
         text   => HTML::FillInForm::Lite->fill(\$html, $param),
         format => 'html',
@@ -435,7 +435,7 @@ any '/search' => sub {
         active => '/search',
     );
 
-    my $html = $self->render( partial => 1, template => 'search' )->to_string;
+    my $html = $self->render_to_string( template => 'search' );
     $self->render(
         text   => HTML::FillInForm::Lite->fill(\$html, $param),
         format => 'html',
@@ -482,7 +482,7 @@ get  '/create-bug' => sub {
         view   => \%view,
     );
 
-    my $html = $self->render( partial => 1, template => 'create-bug' )->to_string;
+    my $html = $self->render_to_string( template => 'create-bug' );
     $self->render(
         text   => HTML::FillInForm::Lite->fill(\$html, $param),
         format => 'html',
@@ -583,7 +583,7 @@ post '/create-bug' => sub {
         view   => \%view,
     );
 
-    my $html = $self->render( partial => 1, template => 'create-bug' )->to_string;
+    my $html = $self->render_to_string( template => 'create-bug' );
     $self->render(
         text   => HTML::FillInForm::Lite->fill( \$html, { %$param, %view } ),
         format => 'html',
